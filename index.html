@@ -117,6 +117,62 @@
             background-color: #ff3b30;
             color: #ffffff;
         }
+        @media screen and (max-width: 768px) {
+        .container {
+            padding: 20px;
+            margin: 20px 10px;
+        }
+
+        h1 {
+            font-size: 24px;
+        }
+
+        input[type="text"], input[type="date"], input[type="email"] {
+            font-size: 14px;
+        }
+
+        button {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        table {
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 8px;
+        }
+
+        .edit-btn, .delete-btn {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+    }
+
+    /* CSS cho iPad và màn hình vừa */
+    @media screen and (min-width: 769px) and (max-width: 1024px) {
+        .container {
+            padding: 30px;
+            margin: 30px auto;
+        }
+
+        h1 {
+            font-size: 28px;
+        }
+
+        input[type="text"], input[type="date"], input[type="email"] {
+            font-size: 15px;
+        }
+
+        button {
+            font-size: 15px;
+        }
+
+        table {
+            font-size: 15px;
+        }
+    }
     </style>
 </head>
 <body>
