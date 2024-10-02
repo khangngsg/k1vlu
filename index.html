@@ -3,99 +3,306 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Môi Trường Của Chúng Ta</title>
+    <title>Form Điểm Danh - Space X (Apple Style)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+            line-height: 1.6;
+            padding: 20px;
             margin: 0;
-            padding: 0;
         }
-        header {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px;
+        .container {
+            background-color: #ffffff;
+            border-radius: 18px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 800px;
+            margin: 40px auto;
+        }
+        h1 {
+            color: #1d1d1f;
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 30px;
             text-align: center;
         }
-        .description {
-            font-size: 1.2em;
-            margin-bottom: 20px;
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #1d1d1f;
         }
-        .post-form {
-            background-color: white;
-            padding: 20px;
-            margin: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        textarea {
+        input[type="text"], input[type="date"], input[type="email"] {
             width: 100%;
-            height: 100px;
-            margin-bottom: 10px;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #d2d2d7;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
         }
-        input[type="file"] {
-            margin-bottom: 10px;
+        input[type="text"]:focus, input[type="date"]:focus, input[type="email"]:focus {
+            outline: none;
+            border-color: #0071e3;
         }
         button {
-            background-color: #4CAF50;
-            color: white;
+            background-color: #0071e3;
+            color: #ffffff;
             border: none;
-            padding: 10px;
+            padding: 12px 20px;
+            border-radius: 8px;
             cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
         }
         button:hover {
-            background-color: #45a049;
+            background-color: #0077ed;
         }
-        .posts {
-            margin: 20px;
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 30px;
+            background-color: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .post {
-            background-color: white;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid #d2d2d7;
         }
-        img {
-            max-width: 100%;
-            border-radius: 5px;
+        th {
+            background-color: #f5f5f7;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        .status-group {
+            margin-bottom: 20px;
+        }
+        .status-group label {
+            display: inline-block;
+            margin-right: 20px;
+        }
+        .present {
+            color: #28cd41;
+        }
+        .absent {
+            color: #ff3b30;
+        }
+        #exportButton, #emailButton {
+            display: none;
+            margin-top: 20px;
+        }
+        .edit-btn, .delete-btn {
+            padding: 8px 16px;
+            margin: 2px;
+            font-size: 14px;
+            border-radius: 6px;
+        }
+        .edit-btn {
+            background-color: #ffd60a;
+            color: #1d1d1f;
+        }
+        .delete-btn {
+            background-color: #ff3b30;
+            color: #ffffff;
         }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>Form Điểm Danh - Space X</h1>
+        <form id="attendanceForm">
+            <label for="date">Ngày:</label>
+            <input type="date" id="date" name="date" required>
+            
+            <label for="subject">Môn học:</label>
+            <input type="text" id="subject" name="subject" required>
+            
+            <label for="studentName">Tên học sinh:</label>
+            <input type="text" id="studentName" name="studentName">
+            
+            <label for="studentEmail">Email học sinh:</label>
+            <input type="email" id="studentEmail" name="studentEmail" required>
+            
+            <div class="status-group">
+                <label>Trạng thái:</label>
+                <label>
+                    <input type="radio" name="status" value="Có mặt" checked> Có mặt
+                </label>
+                <label>
+                    <input type="radio" name="status" value="Vắng mặt"> Vắng mặt
+                </label>
+            </div>
+            
+            <button type="button" onclick="addStudent()">Thêm học sinh</button>
+        </form>
+        
+        <div id="attendanceTable"></div>
+        
+        <button id="exportButton" onclick="exportToPNG()">Xuất bảng thành PNG</button>
+        <button id="emailButton" onclick="sendEmails()">Gửi qua Email</button>
+    </div>
+    <script>
+        let students = [];
+        let editingIndex = -1;
 
-<header>
-    <h1>Môi Trường Của Chúng Ta</h1>
-    <p class="description">Một cộng đồng bảo vệ môi trường từ nhóm IT nhỏ học VLU</p>
-</header>
-
-<div class="post-form">
-    <h2>Viết Bài Đăng</h2>
-    <form action="post.php" method="POST" enctype="multipart/form-data">
-        <textarea name="content" placeholder="Chia sẻ ý kiến của bạn..." required></textarea>
-        <input type="file" name="image" accept="image/*">
-        <button type="submit">Đăng Bài</button>
-    </form>
-</div>
-
-<div class="posts">
-    <h2>Bài Đăng Gần Đây</h2>
-    <?php
-    // Đọc và hiển thị bài đăng từ file
-    if (file_exists("posts.txt")) {
-        $posts = file("posts.txt", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        foreach ($posts as $post) {
-            list($content, $image) = explode("|||", $post);
-            echo '<div class="post">';
-            echo '<p>' . htmlspecialchars($content) . '</p>';
-            if (!empty($image)) {
-                echo '<img src="' . htmlspecialchars($image) . '" alt="Hình ảnh minh họa">';
+        window.onload = function() {
+            const savedStudents = localStorage.getItem('attendanceData');
+            if (savedStudents) {
+                students = JSON.parse(savedStudents);
+                updateTable();
             }
-            echo '</div>';
         }
-    }
-    ?>
-</div>
 
+        function addStudent() {
+            const date = document.getElementById('date').value;
+            const subject = document.getElementById('subject').value;
+            const name = document.getElementById('studentName').value;
+            const email = document.getElementById('studentEmail').value;
+            const status = document.querySelector('input[name="status"]:checked').value;
+
+            if (date && subject && name && email) {
+                if (editingIndex === -1) {
+                    students.push({ date, subject, name, email, status });
+                } else {
+                    students[editingIndex] = { date, subject, name, email, status };
+                    editingIndex = -1;
+                }
+                updateTable();
+                resetForm();
+                saveData();
+            } else {
+                alert('Vui lòng điền đầy đủ thông tin!');
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('studentName').value = '';
+            document.getElementById('studentEmail').value = '';
+            document.querySelector('input[name="status"][value="Có mặt"]').checked = true;
+            document.getElementById('attendanceForm').querySelector('button').textContent = 'Thêm học sinh';
+        }
+
+        function updateTable() {
+            const tableDiv = document.getElementById('attendanceTable');
+            if (students.length > 0) {
+                let tableHTML = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Ngày</th>
+                                <th>Môn học</th>
+                                <th>Tên học sinh</th>
+                                <th>Email</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                students.forEach((student, index) => {
+                    const statusClass = student.status === 'Có mặt' ? 'present' : 'absent';
+                    tableHTML += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${student.date}</td>
+                            <td>${student.subject}</td>
+                            <td>${student.name}</td>
+                            <td>${student.email}</td>
+                            <td class="${statusClass}">${student.status}</td>
+                            <td>
+                                <button class="edit-btn" onclick="editStudent(${index})">Sửa</button>
+                                <button class="delete-btn" onclick="deleteStudent(${index})">Xóa</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tableHTML += `
+                        </tbody>
+                    </table>
+                `;
+                tableDiv.innerHTML = tableHTML;
+                document.getElementById('exportButton').style.display = 'inline-block';
+                document.getElementById('emailButton').style.display = 'inline-block';
+            } else {
+                tableDiv.innerHTML = '';
+                document.getElementById('exportButton').style.display = 'none';
+                document.getElementById('emailButton').style.display = 'none';
+            }
+        }
+
+        function editStudent(index) {
+            const student = students[index];
+            document.getElementById('date').value = student.date;
+            document.getElementById('subject').value = student.subject;
+            document.getElementById('studentName').value = student.name;
+            document.getElementById('studentEmail').value = student.email;
+            document.querySelector(`input[name="status"][value="${student.status}"]`).checked = true;
+            document.getElementById('attendanceForm').querySelector('button').textContent = 'Cập nhật';
+            editingIndex = index;
+        }
+
+        function deleteStudent(index) {
+            if (confirm('Bạn có chắc chắn muốn xóa học sinh này?')) {
+                students.splice(index, 1);
+                updateTable();
+                resetForm();
+                saveData();
+            }
+        }
+
+        function exportToPNG() {
+            const table = document.querySelector('#attendanceTable table');
+            if (!table) {
+                alert('Chưa có dữ liệu để xuất!');
+                return;
+            }
+            html2canvas(table).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'danh-sach-diem-danh.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+
+        function saveData() {
+            localStorage.setItem('attendanceData', JSON.stringify(students));
+        }
+
+        function sendEmails() {
+            if (students.length === 0) {
+                alert('Chưa có học sinh nào trong danh sách!');
+                return;
+            }
+
+            const subject = encodeURIComponent('Thông tin điểm danh');
+            const emailAddresses = students.map(student => student.email).join(',');
+            
+            let body = 'Thông tin điểm danh:\n\n';
+            students.forEach(student => {
+                body += `Học sinh: ${student.name}\n`;
+                body += `Ngày: ${student.date}\n`;
+                body += `Môn học: ${student.subject}\n`;
+                body += `Trạng thái: ${student.status}\n\n`;
+            });
+
+            const encodedBody = encodeURIComponent(body);
+            const mailtoLink = `mailto:${emailAddresses}?subject=${subject}&body=${encodedBody}`;
+
+            window.location.href = mailtoLink;
+        }
+    </script>
 </body>
 </html>
