@@ -1,364 +1,112 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Form Điểm Danh - Space X (Apple Style)</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            background-color: #f5f5f7;
-            color: #1d1d1f;
-            line-height: 1.6;
-            padding: 20px;
-            margin: 0;
-        }
-        .container {
-            background-color: #ffffff;
-            border-radius: 18px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            padding: 40px;
-            max-width: 800px;
-            margin: 40px auto;
-        }
-        h1 {
-            color: #1d1d1f;
-            font-size: 32px;
-            font-weight: 600;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #1d1d1f;
-        }
-        input[type="text"], input[type="date"], input[type="email"] {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 20px;
-            border: 1px solid #d2d2d7;
-            border-radius: 8px;
-            box-sizing: border-box;
-            font-size: 16px;
-            transition: border-color 0.3s ease;
-        }
-        input[type="text"]:focus, input[type="date"]:focus, input[type="email"]:focus {
-            outline: none;
-            border-color: #0071e3;
-        }
-        button {
-            background-color: #0071e3;
-            color: #ffffff;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 500;
-            transition: background-color 0.3s ease;
-        }
-        button:hover {
-            background-color: #0077ed;
-        }
-        table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            margin-top: 30px;
-            background-color: #fff;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        th, td {
-            padding: 16px;
-            text-align: left;
-            border-bottom: 1px solid #d2d2d7;
-        }
-        th {
-            background-color: #f5f5f7;
-            font-weight: 600;
-            color: #1d1d1f;
-        }
-        tr:last-child td {
-            border-bottom: none;
-        }
-        .status-group {
-            margin-bottom: 20px;
-        }
-        .status-group label {
-            display: inline-block;
-            margin-right: 20px;
-        }
-        .present {
-            color: #28cd41;
-        }
-        .absent {
-            color: #ff3b30;
-        }
-        #exportButton, #emailButton {
-            display: none;
-            margin-top: 20px;
-        }
-        .edit-btn, .delete-btn {
-            padding: 8px 16px;
-            margin: 2px;
-            font-size: 14px;
-            border-radius: 6px;
-        }
-        .edit-btn {
-            background-color: #ffd60a;
-            color: #1d1d1f;
-        }
-        .delete-btn {
-            background-color: #ff3b30;
-            color: #ffffff;
-        }
-        @media screen and (max-width: 768px) {
-        .container {
-            padding: 20px;
-            margin: 20px 10px;
-        }
-
-        h1 {
-            font-size: 24px;
-        }
-
-        input[type="text"], input[type="date"], input[type="email"] {
-            font-size: 14px;
-        }
-
-        button {
-            width: 100%;
-            margin-bottom: 10px;
-        }
-
-        table {
-            font-size: 14px;
-        }
-
-        th, td {
-            padding: 8px;
-        }
-
-        .edit-btn, .delete-btn {
-            padding: 6px 12px;
-            font-size: 12px;
-        }
-    }
-
-    /* CSS cho iPad và màn hình vừa */
-    @media screen and (min-width: 769px) and (max-width: 1024px) {
-        .container {
-            padding: 30px;
-            margin: 30px auto;
-        }
-
-        h1 {
-            font-size: 28px;
-        }
-
-        input[type="text"], input[type="date"], input[type="email"] {
-            font-size: 15px;
-        }
-
-        button {
-            font-size: 15px;
-        }
-
-        table {
-            font-size: 15px;
-        }
-    }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Face Attendance System</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/face-api.js/0.22.2/face-api.min.js"></script>
 </head>
-<body>
-    <div class="container">
-        <h1>Form Điểm Danh - Space X</h1>
-        <form id="attendanceForm">
-            <label for="date">Ngày:</label>
-            <input type="date" id="date" name="date" required>
-            
-            <label for="subject">Môn học:</label>
-            <input type="text" id="subject" name="subject" required>
-            
-            <label for="studentName">Tên học sinh:</label>
-            <input type="text" id="studentName" name="studentName">
-            
-            <label for="studentEmail">Email học sinh:</label>
-            <input type="email" id="studentEmail" name="studentEmail" required>
-            
-            <div class="status-group">
-                <label>Trạng thái:</label>
-                <label>
-                    <input type="radio" name="status" value="Có mặt" checked> Có mặt
-                </label>
-                <label>
-                    <input type="radio" name="status" value="Vắng mặt"> Vắng mặt
-                </label>
-            </div>
-            
-            <button type="button" onclick="addStudent()">Thêm học sinh</button>
-        </form>
-        
-        <div id="attendanceTable"></div>
-        
-        <button id="exportButton" onclick="exportToPNG()">Xuất bảng thành PNG</button>
-        <button id="emailButton" onclick="sendEmails()">Gửi qua Email</button>
+<body class="bg-gray-100 py-8">
+  <div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+    <h1 class="text-2xl font-bold mb-4">Face Attendance System</h1>
+    <div class="flex justify-center mb-4">
+      <video id="video" width="640" height="480" autoplay muted></video>
+      <canvas id="canvas" width="640" height="480" class="hidden"></canvas>
     </div>
+    <div class="text-center mb-4">
+      <button id="scanButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        <svg class="w-6 h-6 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+        </svg>
+        Scan Face
+      </button>
+    </div>
+    <div id="result" class="text-center"></div>
+    <div id="loginHistory" class="mt-4"></div>
+
     <script>
-        let students = [];
-        let editingIndex = -1;
+      // Khởi tạo camera và canvas
+      const video = document.getElementById('video');
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
 
-        window.onload = function() {
-            const savedStudents = localStorage.getItem('attendanceData');
-            if (savedStudents) {
-                students = JSON.parse(savedStudents);
-                updateTable();
-            }
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          video.srcObject = stream;
+          video.play();
+        })
+        .catch(error => {
+          console.error('Error initializing camera:', error);
+        });
+
+      // Sự kiện khi bấm nút "Scan Face"
+      const scanButton = document.getElementById('scanButton');
+      const resultDiv = document.getElementById('result');
+      const loginHistoryDiv = document.getElementById('loginHistory');
+
+      scanButton.addEventListener('click', async () => {
+        // Nhận diện khuôn mặt
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const detections = await faceApi.detectSingleFace(canvas, new faceApi.TinyFaceDetectorOptions());
+
+        if (detections) {
+          // Lưu lịch sử đăng nhập
+          const loginTime = new Date().toLocaleString();
+          const loginHistory = JSON.parse(localStorage.getItem('loginHistory')) || [];
+          loginHistory.push({ time: loginTime, image: canvas.toDataURL() });
+          localStorage.setItem('loginHistory', JSON.stringify(loginHistory));
+
+          // Hiển thị thông báo đăng nhập thành công
+          resultDiv.innerHTML = `
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+              <strong class="font-bold">Đăng nhập thành công!</strong>
+              <span class="block sm:inline">Chào mừng ${/* Tên người dùng được nhận diện */}.</span>
+            </div>
+          `;
+
+          // Hiển thị lịch sử đăng nhập
+          showLoginHistory();
+        } else {
+          // Hiển thị thông báo đăng nhập thất bại
+          resultDiv.innerHTML = `
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+              <strong class="font-bold">Đăng nhập thất bại!</strong>
+              <span class="block sm:inline">Không thể nhận diện khuôn mặt. Vui lòng thử lại.</span>
+            </div>
+          `;
         }
+      });
 
-        function addStudent() {
-            const date = document.getElementById('date').value;
-            const subject = document.getElementById('subject').value;
-            const name = document.getElementById('studentName').value;
-            const email = document.getElementById('studentEmail').value;
-            const status = document.querySelector('input[name="status"]:checked').value;
+      // Hiển thị lịch sử đăng nhập
+      function showLoginHistory() {
+        const loginHistory = JSON.parse(localStorage.getItem('loginHistory')) || [];
+        let historyHTML = '';
 
-            if (date && subject && name && email) {
-                if (editingIndex === -1) {
-                    students.push({ date, subject, name, email, status });
-                } else {
-                    students[editingIndex] = { date, subject, name, email, status };
-                    editingIndex = -1;
-                }
-                updateTable();
-                resetForm();
-                saveData();
-            } else {
-                alert('Vui lòng điền đầy đủ thông tin!');
-            }
-        }
+        loginHistory.forEach((entry, index) => {
+          historyHTML += `
+            <div class="flex items-center mb-2">
+              <img src="${entry.image}" alt="Login ${index}" class="w-12 h-12 rounded-full mr-2" />
+              <span>${entry.time}</span>
+            </div>
+          `;
+        });
 
-        function resetForm() {
-            document.getElementById('studentName').value = '';
-            document.getElementById('studentEmail').value = '';
-            document.querySelector('input[name="status"][value="Có mặt"]').checked = true;
-            document.getElementById('attendanceForm').querySelector('button').textContent = 'Thêm học sinh';
-        }
+        loginHistoryDiv.innerHTML = `
+          <h3 class="text-xl font-bold mb-2">Lịch sử đăng nhập</h3>
+          ${historyHTML}
+        `;
+      }
 
-        function updateTable() {
-            const tableDiv = document.getElementById('attendanceTable');
-            if (students.length > 0) {
-                let tableHTML = `
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>STT</th>
-                                <th>Ngày</th>
-                                <th>Môn học</th>
-                                <th>Tên học sinh</th>
-                                <th>Email</th>
-                                <th>Trạng thái</th>
-                                <th>Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
-                students.forEach((student, index) => {
-                    const statusClass = student.status === 'Có mặt' ? 'present' : 'absent';
-                    tableHTML += `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td>${student.date}</td>
-                            <td>${student.subject}</td>
-                            <td>${student.name}</td>
-                            <td>${student.email}</td>
-                            <td class="${statusClass}">${student.status}</td>
-                            <td>
-                                <button class="edit-btn" onclick="editStudent(${index})">Sửa</button>
-                                <button class="delete-btn" onclick="deleteStudent(${index})">Xóa</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-                tableHTML += `
-                        </tbody>
-                    </table>
-                `;
-                tableDiv.innerHTML = tableHTML;
-                document.getElementById('exportButton').style.display = 'inline-block';
-                document.getElementById('emailButton').style.display = 'inline-block';
-            } else {
-                tableDiv.innerHTML = '';
-                document.getElementById('exportButton').style.display = 'none';
-                document.getElementById('emailButton').style.display = 'none';
-            }
-        }
-
-        function editStudent(index) {
-            const student = students[index];
-            document.getElementById('date').value = student.date;
-            document.getElementById('subject').value = student.subject;
-            document.getElementById('studentName').value = student.name;
-            document.getElementById('studentEmail').value = student.email;
-            document.querySelector(`input[name="status"][value="${student.status}"]`).checked = true;
-            document.getElementById('attendanceForm').querySelector('button').textContent = 'Cập nhật';
-            editingIndex = index;
-        }
-
-        function deleteStudent(index) {
-            if (confirm('Bạn có chắc chắn muốn xóa học sinh này?')) {
-                students.splice(index, 1);
-                updateTable();
-                resetForm();
-                saveData();
-            }
-        }
-
-        function exportToPNG() {
-            const table = document.querySelector('#attendanceTable table');
-            if (!table) {
-                alert('Chưa có dữ liệu để xuất!');
-                return;
-            }
-            html2canvas(table).then(canvas => {
-                const link = document.createElement('a');
-                link.download = 'danh-sach-diem-danh.png';
-                link.href = canvas.toDataURL();
-                link.click();
-            });
-        }
-
-        function saveData() {
-            localStorage.setItem('attendanceData', JSON.stringify(students));
-        }
-
-        function sendEmails() {
-            if (students.length === 0) {
-                alert('Chưa có học sinh nào trong danh sách!');
-                return;
-            }
-
-            const subject = encodeURIComponent('Thông tin điểm danh');
-            const emailAddresses = students.map(student => student.email).join(',');
-            
-            let body = 'Thông tin điểm danh:\n\n';
-            students.forEach(student => {
-                body += `Học sinh: ${student.name}\n`;
-                body += `Ngày: ${student.date}\n`;
-                body += `Môn học: ${student.subject}\n`;
-                body += `Trạng thái: ${student.status}\n\n`;
-            });
-
-            const encodedBody = encodeURIComponent(body);
-            const mailtoLink = `mailto:${emailAddresses}?subject=${subject}&body=${encodedBody}`;
-
-            window.location.href = mailtoLink;
-        }
+      // Tải thư viện face-api.js
+      Promise.all([
+        faceApi.nets.tinyFaceDetector.loadFromUri('/models'),
+        faceApi.nets.faceLandmark68Net.loadFromUri('/models'),
+        faceApi.nets.faceRecognitionNet.loadFromUri('/models'),
+        faceApi.nets.faceExpressionNet.loadFromUri('/models')
+      ]).then(showModal);
     </script>
+  </div>
 </body>
 </html>
