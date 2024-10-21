@@ -10,56 +10,109 @@
 <body class="bg-gray-100 py-8">
   <div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
     <h1 class="text-2xl font-bold mb-4">Face Attendance System</h1>
-    <div class="flex justify-center mb-4">
-      <video id="video" width="640" height="480" autoplay muted></video>
-      <canvas id="canvas" width="640" height="480" class="hidden"></canvas>
+
+    <!-- Đăng ký người dùng -->
+    <div id="registerSection" class="mb-4">
+      <h2 class="text-xl font-bold mb-2">Đăng ký người dùng</h2>
+      <div class="flex justify-center mb-4">
+        <video id="registerVideo" width="640" height="480" autoplay muted></video>
+        <canvas id="registerCanvas" width="640" height="480" class="hidden"></canvas>
+      </div>
+      <div class="text-center mb-4">
+        <button id="registerButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+          <svg class="w-6 h-6 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+          </svg>
+          Đăng ký
+        </button>
+      </div>
+      <div id="registerResult" class="text-center"></div>
     </div>
-    <div class="text-center mb-4">
-      <button id="scanButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-        <svg class="w-6 h-6 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
-        </svg>
-        Scan Face
-      </button>
+
+    <!-- Đăng nhập -->
+    <div id="loginSection" class="mb-4">
+      <h2 class="text-xl font-bold mb-2">Đăng nhập</h2>
+      <div class="flex justify-center mb-4">
+        <video id="loginVideo" width="640" height="480" autoplay muted></video>
+        <canvas id="loginCanvas" width="640" height="480" class="hidden"></canvas>
+      </div>
+      <div class="text-center mb-4">
+        <button id="loginButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+          <svg class="w-6 h-6 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+          </svg>
+          Đăng nhập
+        </button>
+      </div>
+      <div id="loginResult" class="text-center"></div>
     </div>
-    <div id="result" class="text-center"></div>
+
+    <!-- Lịch sử đăng nhập -->
     <div id="loginHistory" class="mt-4"></div>
 
     <script>
-      // Khởi tạo camera và canvas
-      const video = document.getElementById('video');
-      const canvas = document.getElementById('canvas');
-      const ctx = canvas.getContext('2d');
+      // Khởi tạo camera và canvas cho đăng ký và đăng nhập
+      const registerVideo = document.getElementById('registerVideo');
+      const registerCanvas = document.getElementById('registerCanvas');
+      const loginVideo = document.getElementById('loginVideo');
+      const loginCanvas = document.getElementById('loginCanvas');
 
-      navigator.mediaDevices.getUserMedia({ video: true })
-        .then(stream => {
-          video.srcObject = stream;
-          video.play();
-        })
-        .catch(error => {
-          console.error('Error initializing camera:', error);
-        });
+      // Khởi tạo camera cho đăng ký và đăng nhập
+      function initCamera(videoElement, canvasElement) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+          .then(stream => {
+            videoElement.srcObject = stream;
+            videoElement.play();
+          })
+          .catch(error => {
+            console.error('Error initializing camera:', error);
+          });
+      }
 
-      // Sự kiện khi bấm nút "Scan Face"
-      const scanButton = document.getElementById('scanButton');
-      const resultDiv = document.getElementById('result');
+      initCamera(registerVideo, registerCanvas);
+      initCamera(loginVideo, loginCanvas);
+
+      // Sự kiện khi bấm nút "Đăng ký"
+      const registerButton = document.getElementById('registerButton');
+      const registerResultDiv = document.getElementById('registerResult');
+
+      registerButton.addEventListener('click', async () => {
+        // Chụp ảnh khuôn mặt và lưu vào localStorage
+        const registerCanvasContext = registerCanvas.getContext('2d');
+        registerCanvasContext.drawImage(registerVideo, 0, 0, registerCanvas.width, registerCanvas.height);
+        const faceImage = registerCanvas.toDataURL();
+        localStorage.setItem('faceImage', faceImage);
+
+        // Hiển thị thông báo đăng ký thành công
+        registerResultDiv.innerHTML = `
+          <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+            <strong class="font-bold">Đăng ký thành công!</strong>
+            <span class="block sm:inline">Khuôn mặt của bạn đã được lưu lại.</span>
+          </div>
+        `;
+      });
+
+      // Sự kiện khi bấm nút "Đăng nhập"
+      const loginButton = document.getElementById('loginButton');
+      const loginResultDiv = document.getElementById('loginResult');
       const loginHistoryDiv = document.getElementById('loginHistory');
 
-      scanButton.addEventListener('click', async () => {
+      loginButton.addEventListener('click', async () => {
         // Nhận diện khuôn mặt
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const detections = await faceApi.detectSingleFace(canvas, new faceApi.TinyFaceDetectorOptions());
+        const loginCanvasContext = loginCanvas.getContext('2d');
+        loginCanvasContext.drawImage(loginVideo, 0, 0, loginCanvas.width, loginCanvas.height);
+        const detections = await faceApi.detectSingleFace(loginCanvas, new faceApi.TinyFaceDetectorOptions());
 
         if (detections) {
           // Lưu lịch sử đăng nhập
           const loginTime = new Date().toLocaleString();
           const loginHistory = JSON.parse(localStorage.getItem('loginHistory')) || [];
-          loginHistory.push({ time: loginTime, image: canvas.toDataURL() });
+          loginHistory.push({ time: loginTime, image: loginCanvas.toDataURL() });
           localStorage.setItem('loginHistory', JSON.stringify(loginHistory));
 
           // Hiển thị thông báo đăng nhập thành công
-          resultDiv.innerHTML = `
+          loginResultDiv.innerHTML = `
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
               <strong class="font-bold">Đăng nhập thành công!</strong>
               <span class="block sm:inline">Chào mừng ${/* Tên người dùng được nhận diện */}.</span>
@@ -70,7 +123,7 @@
           showLoginHistory();
         } else {
           // Hiển thị thông báo đăng nhập thất bại
-          resultDiv.innerHTML = `
+          loginResultDiv.innerHTML = `
             <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
               <strong class="font-bold">Đăng nhập thất bại!</strong>
               <span class="block sm:inline">Không thể nhận diện khuôn mặt. Vui lòng thử lại.</span>
