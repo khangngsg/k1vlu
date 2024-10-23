@@ -1,165 +1,270 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Face Attendance System</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/face-api.js/0.22.2/face-api.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dịch Vụ Sửa Chữa Điện Thoại</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h1, h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .staff-button {
+            background-color: #666;
+            float: right;
+        }
+
+        #staffPanel {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        .order-list {
+            margin-top: 20px;
+        }
+
+        .order-item {
+            background: #fff;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .action-buttons {
+            margin-top: 10px;
+        }
+
+        .accept-btn {
+            background-color: #4CAF50;
+            margin-right: 10px;
+        }
+
+        .reject-btn {
+            background-color: #f44336;
+        }
+
+        .success-message {
+            color: green;
+            text-align: center;
+            margin: 20px 0;
+            display: none;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 py-8">
-  <div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
-    <h1 class="text-2xl font-bold mb-4">Face Attendance System</h1>
+<body>
+    <div class="container">
+        <button class="staff-button" onclick="showStaffLogin()">Chế độ nhân viên</button>
+        <h1>Dịch Vụ Sửa Chữa Điện Thoại</h1>
 
-    <!-- Đăng ký người dùng -->
-    <div id="registerSection" class="mb-4">
-      <h2 class="text-xl font-bold mb-2">Đăng ký người dùng</h2>
-      <div class="flex justify-center mb-4">
-        <video id="registerVideo" width="640" height="480" autoplay muted></video>
-        <canvas id="registerCanvas" width="640" height="480" class="hidden"></canvas>
-      </div>
-      <div class="text-center mb-4">
-        <button id="registerButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-          <svg class="w-6 h-6 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-          </svg>
-          Đăng ký
-        </button>
-      </div>
-      <div id="registerResult" class="text-center"></div>
+        <!-- Form khách hàng -->
+        <div id="customerForm">
+            <div class="form-group">
+                <label for="name">Họ và tên:</label>
+                <input type="text" id="name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Số điện thoại:</label>
+                <input type="tel" id="phone" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="request">Yêu cầu sửa chữa:</label>
+                <textarea id="request" rows="4" required></textarea>
+            </div>
+
+            <button onclick="submitCustomerForm()">Hoàn tất</button>
+            <div id="successMessage" class="success-message">
+                Yêu cầu của bạn đã được gửi thành công! Mã đơn hàng: <span id="orderCode"></span>
+            </div>
+        </div>
+
+        <!-- Panel nhân viên -->
+        <div id="staffPanel">
+            <h2>Quản lý đơn hàng</h2>
+            <div id="orderList" class="order-list">
+                <!-- Đơn hàng sẽ được hiển thị ở đây -->
+            </div>
+        </div>
     </div>
-
-    <!-- Đăng nhập -->
-    <div id="loginSection" class="mb-4">
-      <h2 class="text-xl font-bold mb-2">Đăng nhập</h2>
-      <div class="flex justify-center mb-4">
-        <video id="loginVideo" width="640" height="480" autoplay muted></video>
-        <canvas id="loginCanvas" width="640" height="480" class="hidden"></canvas>
-      </div>
-      <div class="text-center mb-4">
-        <button id="loginButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-          <svg class="w-6 h-6 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
-          </svg>
-          Đăng nhập
-        </button>
-      </div>
-      <div id="loginResult" class="text-center"></div>
-    </div>
-
-    <!-- Lịch sử đăng nhập -->
-    <div id="loginHistory" class="mt-4"></div>
 
     <script>
-      // Khởi tạo camera và canvas cho đăng ký và đăng nhập
-      const registerVideo = document.getElementById('registerVideo');
-      const registerCanvas = document.getElementById('registerCanvas');
-      const loginVideo = document.getElementById('loginVideo');
-      const loginCanvas = document.getElementById('loginCanvas');
+        let orders = [];
+        const STAFF_PASSWORD = 'k1vlu';
 
-      // Khởi tạo camera cho đăng ký và đăng nhập
-      function initCamera(videoElement, canvasElement) {
-        navigator.mediaDevices.getUserMedia({ video: true })
-          .then(stream => {
-            videoElement.srcObject = stream;
-            videoElement.play();
-          })
-          .catch(error => {
-            console.error('Error initializing camera:', error);
-          });
-      }
-
-      initCamera(registerVideo, registerCanvas);
-      initCamera(loginVideo, loginCanvas);
-
-      // Sự kiện khi bấm nút "Đăng ký"
-      const registerButton = document.getElementById('registerButton');
-      const registerResultDiv = document.getElementById('registerResult');
-
-      registerButton.addEventListener('click', async () => {
-        // Chụp ảnh khuôn mặt và lưu vào localStorage
-        const registerCanvasContext = registerCanvas.getContext('2d');
-        registerCanvasContext.drawImage(registerVideo, 0, 0, registerCanvas.width, registerCanvas.height);
-        const faceImage = registerCanvas.toDataURL();
-        localStorage.setItem('faceImage', faceImage);
-
-        // Hiển thị thông báo đăng ký thành công
-        registerResultDiv.innerHTML = `
-          <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-            <strong class="font-bold">Đăng ký thành công!</strong>
-            <span class="block sm:inline">Khuôn mặt của bạn đã được lưu lại.</span>
-          </div>
-        `;
-      });
-
-      // Sự kiện khi bấm nút "Đăng nhập"
-      const loginButton = document.getElementById('loginButton');
-      const loginResultDiv = document.getElementById('loginResult');
-      const loginHistoryDiv = document.getElementById('loginHistory');
-
-      loginButton.addEventListener('click', async () => {
-        // Nhận diện khuôn mặt
-        const loginCanvasContext = loginCanvas.getContext('2d');
-        loginCanvasContext.drawImage(loginVideo, 0, 0, loginCanvas.width, loginCanvas.height);
-        const detections = await faceApi.detectSingleFace(loginCanvas, new faceApi.TinyFaceDetectorOptions());
-
-        if (detections) {
-          // Lưu lịch sử đăng nhập
-          const loginTime = new Date().toLocaleString();
-          const loginHistory = JSON.parse(localStorage.getItem('loginHistory')) || [];
-          loginHistory.push({ time: loginTime, image: loginCanvas.toDataURL() });
-          localStorage.setItem('loginHistory', JSON.stringify(loginHistory));
-
-          // Hiển thị thông báo đăng nhập thành công
-          loginResultDiv.innerHTML = `
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-              <strong class="font-bold">Đăng nhập thành công!</strong>
-              <span class="block sm:inline">Chào mừng ${/* Tên người dùng được nhận diện */}.</span>
-            </div>
-          `;
-
-          // Hiển thị lịch sử đăng nhập
-          showLoginHistory();
-        } else {
-          // Hiển thị thông báo đăng nhập thất bại
-          loginResultDiv.innerHTML = `
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-              <strong class="font-bold">Đăng nhập thất bại!</strong>
-              <span class="block sm:inline">Không thể nhận diện khuôn mặt. Vui lòng thử lại.</span>
-            </div>
-          `;
+        function generateOrderCode() {
+            return 'ORD' + Date.now().toString().slice(-6);
         }
-      });
 
-      // Hiển thị lịch sử đăng nhập
-      function showLoginHistory() {
-        const loginHistory = JSON.parse(localStorage.getItem('loginHistory')) || [];
-        let historyHTML = '';
+        function submitCustomerForm() {
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const email = document.getElementById('email').value;
+            const request = document.getElementById('request').value;
 
-        loginHistory.forEach((entry, index) => {
-          historyHTML += `
-            <div class="flex items-center mb-2">
-              <img src="${entry.image}" alt="Login ${index}" class="w-12 h-12 rounded-full mr-2" />
-              <span>${entry.time}</span>
-            </div>
-          `;
-        });
+            if (!name || !phone || !email || !request) {
+                alert('Vui lòng điền đầy đủ thông tin!');
+                return;
+            }
 
-        loginHistoryDiv.innerHTML = `
-          <h3 class="text-xl font-bold mb-2">Lịch sử đăng nhập</h3>
-          ${historyHTML}
-        `;
-      }
+            const orderCode = generateOrderCode();
+            const order = {
+                code: orderCode,
+                name: name,
+                phone: phone,
+                email: email,
+                request: request,
+                status: 'pending',
+                date: new Date().toLocaleString()
+            };
 
-      // Tải thư viện face-api.js
-      Promise.all([
-        faceApi.nets.tinyFaceDetector.loadFromUri('/models'),
-        faceApi.nets.faceLandmark68Net.loadFromUri('/models'),
-        faceApi.nets.faceRecognitionNet.loadFromUri('/models'),
-        faceApi.nets.faceExpressionNet.loadFromUri('/models')
-      ]).then(showModal);
+            orders.push(order);
+            saveOrders();
+
+            document.getElementById('orderCode').textContent = orderCode;
+            document.getElementById('successMessage').style.display = 'block';
+            
+            // Reset form
+            document.getElementById('name').value = '';
+            document.getElementById('phone').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('request').value = '';
+        }
+
+        function showStaffLogin() {
+            const password = prompt('Nhập mật khẩu nhân viên:');
+            if (password === STAFF_PASSWORD) {
+                document.getElementById('customerForm').style.display = 'none';
+                document.getElementById('staffPanel').style.display = 'block';
+                loadOrders();
+            } else {
+                alert('Mật khẩu không đúng!');
+            }
+        }
+
+        function saveOrders() {
+            localStorage.setItem('repairOrders', JSON.stringify(orders));
+        }
+
+        function loadOrders() {
+            const savedOrders = localStorage.getItem('repairOrders');
+            if (savedOrders) {
+                orders = JSON.parse(savedOrders);
+                displayOrders();
+            }
+        }
+
+        function displayOrders() {
+            const orderList = document.getElementById('orderList');
+            orderList.innerHTML = '';
+
+            orders.forEach(order => {
+                const orderElement = document.createElement('div');
+                orderElement.className = 'order-item';
+                orderElement.innerHTML = `
+                    <strong>Mã đơn: ${order.code}</strong><br>
+                    Khách hàng: ${order.name}<br>
+                    SĐT: ${order.phone}<br>
+                    Email: ${order.email}<br>
+                    Yêu cầu: ${order.request}<br>
+                    Ngày tạo: ${order.date}<br>
+                    Trạng thái: ${order.status}<br>
+                    <div class="action-buttons">
+                        ${order.status === 'pending' ? `
+                            <button class="accept-btn" onclick="handleOrder('${order.code}', 'accepted')">Nhận đơn</button>
+                            <button class="reject-btn" onclick="handleOrder('${order.code}', 'rejected')">Từ chối</button>
+                        ` : ''}
+                    </div>
+                `;
+                orderList.appendChild(orderElement);
+            });
+        }
+
+        function handleOrder(orderCode, status) {
+            const order = orders.find(o => o.code === orderCode);
+            if (order) {
+                order.status = status;
+                saveOrders();
+                
+                // Giả lập gửi email
+                const message = status === 'accepted' ? 
+                    'Đơn hàng của bạn đã được chấp nhận và đang được xử lý.' :
+                    'Rất tiếc, đơn hàng của bạn đã bị từ chối.';
+                
+                alert(`Email đã được gửi tới ${order.email} với nội dung: ${message}`);
+                
+                displayOrders();
+            }
+        }
+
+        // Load saved orders when page loads
+        window.onload = function() {
+            loadOrders();
+        }
     </script>
-  </div>
 </body>
 </html>
