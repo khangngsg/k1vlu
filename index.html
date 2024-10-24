@@ -1,228 +1,59 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dịch Vụ Sửa Chữa Điện Thoại</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-        }
+order.status = status;
+                saveOrders();
+                
+                // Chuẩn bị nội dung email dựa trên các dịch vụ đã chọn
+                let serviceDetails = order.services.map(service => {
+                    switch(service) {
+                        case 'battery': return 'Thay pin';
+                        case 'screen': return 'Thay màn hình';
+                        case 'speaker': return 'Sửa loa';
+                        case 'camera': return 'Sửa camera';
+                        case 'charging': return 'Sửa cổng sạc';
+                        default: return service;
+                    }
+                }).join(', ');
 
-        body {
-            background-color: #f4f4f4;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-
-        h1, h2 {
-            color: #333;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        input, textarea {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
-
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-
-        .staff-button {
-            background-color: #666;
-            float: right;
-        }
-
-        #staffPanel {
-            display: none;
-            margin-top: 20px;
-            padding: 20px;
-            background: #f9f9f9;
-            border-radius: 4px;
-        }
-
-        .order-list {
-            margin-top: 20px;
-        }
-
-        .order-item {
-            background: #fff;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        .action-buttons {
-            margin-top: 10px;
-        }
-
-        .accept-btn {
-            background-color: #4CAF50;
-            margin-right: 10px;
-        }
-
-        .reject-btn {
-            background-color: #f44336;
-        }
-
-        .success-message {
-            color: green;
-            text-align: center;
-            margin: 20px 0;
-            display: none;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <button class="staff-button" onclick="showStaffLogin()">Chế độ nhân viên</button>
-        <h1>Dịch Vụ Sửa Chữa Điện Thoại</h1>
-
-        <!-- Form khách hàng -->
-        <div id="customerForm">
-            <div class="form-group">
-                <label for="name">Họ và tên:</label>
-                <input type="text" id="name" required>
-            </div>
-
-            <div class="form-group">
-                <label for="phone">Số điện thoại:</label>
-                <input type="tel" id="phone" required>
-            </div>
-
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" required>
-            </div>
-
-            <div class="form-group">
-                <label for="request">Yêu cầu sửa chữa:</label>
-                <textarea id="request" rows="4" required></textarea>
-            </div>
-
-            <button onclick="submitCustomerForm()">Hoàn tất</button>
-            <div id="successMessage" class="success-message">
-                Yêu cầu của bạn đã được gửi thành công! Mã đơn hàng: <span id="orderCode"></span>
-            </div>
-        </div>
-
-        <!-- Panel nhân viên -->
-        <div id="staffPanel">
-            <h2>Quản lý đơn hàng</h2>
-            <div id="orderList" class="order-list">
-                <!-- Đơn hàng sẽ được hiển thị ở đây -->
-            </div>
-        </div>
-    </div>
-
-    <script>
-        let orders = [];
-        const STAFF_PASSWORD = 'k1vlu';
-
-        function generateOrderCode() {
-            return 'ORD' + Date.now().toString().slice(-6);
-        }
-
-        function submitCustomerForm() {
-            const name = document.getElementById('name').value;
-            const phone = document.getElementById('phone').value;
-            const email = document.getElementById('email').value;
-            const request = document.getElementById('request').value;
-
-            if (!name || !phone || !email || !request) {
-                alert('Vui lòng điền đầy đủ thông tin!');
-                return;
-            }
-
-            const orderCode = generateOrderCode();
-            const order = {
-                code: orderCode,
-                name: name,
-                phone: phone,
-                email: email,
-                request: request,
-                status: 'pending',
-                date: new Date().toLocaleString()
-            };
-
-            orders.push(order);
-            saveOrders();
-
-            document.getElementById('orderCode').textContent = orderCode;
-            document.getElementById('successMessage').style.display = 'block';
-            
-            // Reset form
-            document.getElementById('name').value = '';
-            document.getElementById('phone').value = '';
-            document.getElementById('email').value = '';
-            document.getElementById('request').value = '';
-        }
-
-        function showStaffLogin() {
-            const password = prompt('Nhập mật khẩu nhân viên:');
-            if (password === STAFF_PASSWORD) {
-                document.getElementById('customerForm').style.display = 'none';
-                document.getElementById('staffPanel').style.display = 'block';
-                loadOrders();
-            } else {
-                alert('Mật khẩu không đúng!');
-            }
-        }
-
-        function saveOrders() {
-            localStorage.setItem('repairOrders', JSON.stringify(orders));
-        }
-
-        function loadOrders() {
-            const savedOrders = localStorage.getItem('repairOrders');
-            if (savedOrders) {
-                orders = JSON.parse(savedOrders);
+                // Tạo nội dung email chi tiết
+                const emailContent = status === 'accepted' ? 
+                    `Kính gửi ${order.name},\n\n` +
+                    `Đơn hàng ${order.code} của bạn đã được chấp nhận và đang được xử lý.\n` +
+                    `Thông tin chi tiết:\n` +
+                    `- Thiết bị: ${order.deviceModel}\n` +
+                    `- Dịch vụ: ${serviceDetails}\n` +
+                    `- Thời gian tiếp nhận: ${new Date().toLocaleString()}\n\n` +
+                    `Chúng tôi sẽ liên hệ với bạn qua số điện thoại ${order.phone} để thông báo chi tiết về thời gian và chi phí sửa chữa.\n\n` +
+                    `Xin cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.` :
+                    `Kính gửi ${order.name},\n\n` +
+                    `Rất tiếc, đơn hàng ${order.code} của bạn đã bị từ chối.\n` +
+                    `Vui lòng liên hệ với chúng tôi qua hotline để được hỗ trợ thêm.\n\n` +
+                    `Xin lỗi vì sự bất tiện này.`;
+                
+                // Giả lập gửi email
+                console.log('Sending email to:', order.email);
+                console.log('Email content:', emailContent);
+                alert(`Email đã được gửi tới ${order.email}`);
+                
                 displayOrders();
             }
         }
 
-        function displayOrders() {
+        // Thêm tính năng tìm kiếm đơn hàng
+        function searchOrders(query) {
+            const searchResults = orders.filter(order => 
+                order.code.toLowerCase().includes(query.toLowerCase()) ||
+                order.name.toLowerCase().includes(query.toLowerCase()) ||
+                order.phone.includes(query) ||
+                order.email.toLowerCase().includes(query.toLowerCase()) ||
+                order.deviceModel.toLowerCase().includes(query.toLowerCase())
+            );
+            displaySearchResults(searchResults);
+        }
+
+        function displaySearchResults(results) {
             const orderList = document.getElementById('orderList');
             orderList.innerHTML = '';
-
-            orders.forEach(order => {
+            results.forEach(order => {
+                // Sử dụng lại logic hiển thị đơn hàng từ hàm displayOrders
                 const orderElement = document.createElement('div');
                 orderElement.className = 'order-item';
                 orderElement.innerHTML = `
@@ -230,7 +61,9 @@
                     Khách hàng: ${order.name}<br>
                     SĐT: ${order.phone}<br>
                     Email: ${order.email}<br>
-                    Yêu cầu: ${order.request}<br>
+                    Thiết bị: ${order.deviceModel} (${order.deviceType})<br>
+                    Dịch vụ: ${order.services.join(', ')}<br>
+                    Mô tả thêm: ${order.request}<br>
                     Ngày tạo: ${order.date}<br>
                     Trạng thái: ${order.status}<br>
                     <div class="action-buttons">
@@ -244,22 +77,74 @@
             });
         }
 
-        function handleOrder(orderCode, status) {
-            const order = orders.find(o => o.code === orderCode);
-            if (order) {
-                order.status = status;
-                saveOrders();
-                
-                // Giả lập gửi email
-                const message = status === 'accepted' ? 
-                    'Đơn hàng của bạn đã được chấp nhận và đang được xử lý.' :
-                    'Rất tiếc, đơn hàng của bạn đã bị từ chối.';
-                
-                alert(`Email đã được gửi tới ${order.email} với nội dung: ${message}`);
-                
-                displayOrders();
+        // Thêm thanh tìm kiếm vào panel nhân viên
+        const staffPanel = document.getElementById('staffPanel');
+        const searchBox = document.createElement('div');
+        searchBox.className = 'form-group';
+        searchBox.innerHTML = `
+            <input type="text" id="searchInput" placeholder="Tìm kiếm đơn hàng..." 
+                   onkeyup="searchOrders(this.value)" class="search-input">
+        `;
+        staffPanel.insertBefore(searchBox, staffPanel.firstChild.nextSibling);
+
+        // Thêm style cho thanh tìm kiếm
+        const style = document.createElement('style');
+        style.textContent = `
+            .search-input {
+                padding: 8px;
+                margin-bottom: 20px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                width: 100%;
             }
+
+            .search-input:focus {
+                outline: none;
+                border-color: #4CAF50;
+                box-shadow: 0 0 5px rgba(76, 175, 80, 0.2);
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Xử lý sắp xếp đơn hàng theo thời gian
+        function sortOrders(type = 'newest') {
+            orders.sort((a, b) => {
+                const dateA = new Date(a.date);
+                const dateB = new Date(b.date);
+                return type === 'newest' ? dateB - dateA : dateA - dateB;
+            });
+            displayOrders();
         }
+
+        // Thêm nút sắp xếp vào panel nhân viên
+        const sortButtons = document.createElement('div');
+        sortButtons.className = 'sort-buttons';
+        sortButtons.innerHTML = `
+            <button onclick="sortOrders('newest')" class="sort-btn">Mới nhất</button>
+            <button onclick="sortOrders('oldest')" class="sort-btn">Cũ nhất</button>
+        `;
+        staffPanel.insertBefore(sortButtons, searchBox.nextSibling);
+
+        // Thêm style cho nút sắp xếp
+        const sortStyle = document.createElement('style');
+        sortStyle.textContent = `
+            .sort-buttons {
+                margin-bottom: 20px;
+                display: flex;
+                gap: 10px;
+            }
+
+            .sort-btn {
+                background-color: #666;
+                padding: 8px 15px;
+                font-size: 14px;
+            }
+
+            .sort-btn:hover {
+                background-color: #555;
+            }
+        `;
+        document.head.appendChild(sortStyle);
 
         // Load saved orders when page loads
         window.onload = function() {
