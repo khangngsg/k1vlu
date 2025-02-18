@@ -15,25 +15,34 @@
         body {
             background-color: #f4f4f4;
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .container {
-            max-width: 800px;
-            margin: 0 auto;
+            max-width: 1200px;
+            width: 100%;
             background: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            flex-wrap: wrap;
         }
 
         h1, h2 {
             color: #333;
             margin-bottom: 20px;
             text-align: center;
+            width: 100%;
         }
 
         .form-group {
             margin-bottom: 15px;
+            width: 100%;
         }
 
         label {
@@ -94,10 +103,13 @@
             padding: 20px;
             background: #f9f9f9;
             border-radius: 4px;
+            width: 100%;
         }
 
         .order-list {
             margin-top: 20px;
+            display: flex;
+            flex-direction: column;
         }
 
         .order-item {
@@ -146,6 +158,47 @@
             }
             to {
                 transform: translateX(0);
+            }
+        }
+
+        .search-input {
+            padding: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 5px rgba(76, 175, 80, 0.2);
+        }
+
+        .sort-buttons {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .sort-btn {
+            background-color: #666;
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+
+        .sort-btn:hover {
+            background-color: #555;
+        }
+
+        .back-to-customer {
+            background-color: #008CBA;
+            margin-top: 10px;
+        }
+
+        @media screen and (max-width: 768px) {
+            .container {
+                flex-direction: column;
             }
         }
     </style>
@@ -223,9 +276,15 @@
         <!-- Panel nhân viên -->
         <div id="staffPanel">
             <h2>Quản lý đơn hàng</h2>
+            <input type="text" id="searchInput" placeholder="Tìm kiếm đơn hàng..." onkeyup="searchOrders(this.value)" class="search-input">
+            <div class="sort-buttons">
+                <button onclick="sortOrders('newest')" class="sort-btn">Mới nhất</button>
+                <button onclick="sortOrders('oldest')" class="sort-btn">Cũ nhất</button>
+            </div>
             <div id="orderList" class="order-list">
                 <!-- Đơn hàng sẽ được hiển thị ở đây -->
             </div>
+            <button onclick="showCustomerForm()" class="back-to-customer">Trở về tạo đơn hàng</button>
         </div>
     </div>
 
@@ -323,7 +382,7 @@
 
             document.getElementById('orderCode').textContent = orderCode;
             document.getElementById('successMessage').style.display = 'block';
-            
+
             // Gửi thông báo cho tất cả nhân viên đang online
             if (typeof BroadcastChannel !== 'undefined') {
                 const bc = new BroadcastChannel('repair_service');
@@ -355,6 +414,11 @@
             }
         }
 
+        function showCustomerForm() {
+            document.getElementById('staffPanel').style.display = 'none';
+            document.getElementById('customerForm').style.display = 'block';
+        }
+
         function setupNotifications() {
             if (typeof BroadcastChannel !== 'undefined') {
                 const bc = new BroadcastChannel('repair_service');
@@ -362,13 +426,20 @@
                     if (event.data.type === 'new_order') {
                         showNotification('Có đơn hàng mới! Mã đơn: ' + event.data.order.code);
                         loadOrders();
+                    } else if (event.data.type === 'update_order') {
+                        showNotification('Đơn hàng đã được cập nhật! Mã đơn: ' + event.data.order.code);
+                        loadOrders();
                     }
                 };
             }
         }
 
         function saveOrders() {
-            localStorage.setItem('repairOrders', JSON.stringify(orders));
+            try {
+                localStorage.setItem('repairOrders', JSON.stringify(orders));
+            } catch (e) {
+                console.error('Không thể lưu dữ liệu vào localStorage: ', e);
+            }
         }
 
         function loadOrders() {
@@ -407,49 +478,6 @@
             });
         }
 
-        function handleOrder(orderCode, status) {
-            const order = orders.find(o => o.code === orderCode);
-            if (order) {
-                order.status = status;
-                saveOrders();
-                
-                // Chuẩn bị nội dung email dựa trên các dịch vụ đã chọn
-                let serviceDetails = order.services.map(service => {
-                    switch(service) {
-                        case 'battery': return 'Thay pin';
-                        case 'screen': return 'Thay màn hình';
-                        case 'speaker': return 'Sửa loa';
-                        case 'camera': return 'Sửa camera';
-                        case 'charging': return 'Sửa cổng sạc';
-                        default: return service;
-                    }
-                }).join(', ');
-
-                // Tạo nội dung email chi tiết
-                const emailContent = status === 'accepted' ? 
-                    `Kính gửi ${order.name},\n\n` +
-                    `Đơn hàng ${order.code} của bạn đã được chấp nhận và đang được xử lý.\n` +
-                    `Thông tin chi tiết:\n` +
-                    `- Thiết bị: ${order.deviceModel}\n` +
-                    `- Dịch vụ: ${serviceDetails}\n` +
-                    `- Thời gian tiếp nhận: ${new Date().toLocaleString()}\n\n` +
-                    `Chúng tôi sẽ liên hệ với bạn qua số điện thoại ${order.phone} để thông báo chi tiết về thời gian và chi phí sửa chữa.\n\n` +
-                    `Xin cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.` :
-                    `Kính gửi ${order.name},\n\n` +
-                    `Rất tiếc, đơn hàng ${order.code} của bạn đã bị từ chối.\n` +
-                    `Vui lòng liên hệ với chúng tôi qua hotline để được hỗ trợ thêm.\n\n` +
-                    `Xin lỗi vì sự bất tiện này.`;
-                
-                // Giả lập gửi email
-                console.log('Sending email to:', order.email);
-                console.log('Email content:', emailContent);
-                alert(`Email đã được gửi tới ${order.email}`);
-                
-                displayOrders();
-            }
-        }
-
-        // Thêm tính năng tìm kiếm đơn hàng
         function searchOrders(query) {
             const searchResults = orders.filter(order => 
                 order.code.toLowerCase().includes(query.toLowerCase()) ||
@@ -465,7 +493,6 @@
             const orderList = document.getElementById('orderList');
             orderList.innerHTML = '';
             results.forEach(order => {
-                // Sử dụng lại logic hiển thị đơn hàng từ hàm displayOrders
                 const orderElement = document.createElement('div');
                 orderElement.className = 'order-item';
                 orderElement.innerHTML = `
@@ -489,36 +516,6 @@
             });
         }
 
-        // Thêm thanh tìm kiếm vào panel nhân viên
-        const staffPanel = document.getElementById('staffPanel');
-        const searchBox = document.createElement('div');
-        searchBox.className = 'form-group';
-        searchBox.innerHTML = `
-            <input type="text" id="searchInput" placeholder="Tìm kiếm đơn hàng..." 
-                   onkeyup="searchOrders(this.value)" class="search-input">
-        `;
-        staffPanel.insertBefore(searchBox, staffPanel.firstChild.nextSibling);
-
-        // Thêm style cho thanh tìm kiếm
-        const style = document.createElement('style');
-        style.textContent = `
-            .search-input {
-                padding: 8px;
-                margin-bottom: 20px;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-                width: 100%;
-            }
-
-            .search-input:focus {
-                outline: none;
-                border-color: #4CAF50;
-                box-shadow: 0 0 5px rgba(76, 175, 80, 0.2);
-            }
-        `;
-        document.head.appendChild(style);
-
-        // Xử lý sắp xếp đơn hàng theo thời gian
         function sortOrders(type = 'newest') {
             orders.sort((a, b) => {
                 const dateA = new Date(a.date);
@@ -528,37 +525,51 @@
             displayOrders();
         }
 
-        // Thêm nút sắp xếp vào panel nhân viên
-        const sortButtons = document.createElement('div');
-        sortButtons.className = 'sort-buttons';
-        sortButtons.innerHTML = `
-            <button onclick="sortOrders('newest')" class="sort-btn">Mới nhất</button>
-            <button onclick="sortOrders('oldest')" class="sort-btn">Cũ nhất</button>
-        `;
-        staffPanel.insertBefore(sortButtons, searchBox.nextSibling);
+        function handleOrder(orderCode, status) {
+            const order = orders.find(o => o.code === orderCode);
+            if (order) {
+                order.status = status;
+                saveOrders();
 
-        // Thêm style cho nút sắp xếp
-        const sortStyle = document.createElement('style');
-        sortStyle.textContent = `
-            .sort-buttons {
-                margin-bottom: 20px;
-                display: flex;
-                gap: 10px;
+                // Gửi thông báo cập nhật trạng thái
+                if (typeof BroadcastChannel !== 'undefined') {
+                    const bc = new BroadcastChannel('repair_service');
+                    bc.postMessage({ type: 'update_order', order: order });
+                }
+                
+                let serviceDetails = order.services.map(service => {
+                    switch(service) {
+                        case 'battery': return 'Thay pin';
+                        case 'screen': return 'Thay màn hình';
+                        case 'speaker': return 'Sửa loa';
+                        case 'camera': return 'Sửa camera';
+                        case 'charging': return 'Sửa cổng sạc';
+                        default: return service;
+                    }
+                }).join(', ');
+
+                const emailContent = status === 'accepted' ? 
+                    `Kính gửi ${order.name},\n\n` +
+                    `Đơn hàng ${order.code} của bạn đã được chấp nhận và đang được xử lý.\n` +
+                    `Thông tin chi tiết:\n` +
+                    `- Thiết bị: ${order.deviceModel}\n` +
+                    `- Dịch vụ: ${serviceDetails}\n` +
+                    `- Thời gian tiếp nhận: ${new Date().toLocaleString()}\n\n` +
+                    `Chúng tôi sẽ liên hệ với bạn qua số điện thoại ${order.phone} để thông báo chi tiết về thời gian và chi phí sửa chữa.\n\n` +
+                    `Xin cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.` :
+                    `Kính gửi ${order.name},\n\n` +
+                    `Rất tiếc, đơn hàng ${order.code} của bạn đã bị từ chối.\n` +
+                    `Vui lòng liên hệ với chúng tôi qua hotline để được hỗ trợ thêm.\n\n` +
+                    `Xin lỗi vì sự bất tiện này.`;
+                
+                console.log('Sending email to:', order.email);
+                console.log('Email content:', emailContent);
+                alert(`Email đã được gửi tới ${order.email}`);
+                
+                displayOrders();
             }
+        }
 
-            .sort-btn {
-                background-color: #666;
-                padding: 8px 15px;
-                font-size: 14px;
-            }
-
-            .sort-btn:hover {
-                background-color: #555;
-            }
-        `;
-        document.head.appendChild(sortStyle);
-
-        // Load saved orders when page loads
         window.onload = function() {
             loadOrders();
         }
