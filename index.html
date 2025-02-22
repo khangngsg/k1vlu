@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Lưu Trữ File - Firebase</title>
+    <title>Hệ Thống Lưu Trữ File</title>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            background: #0f0f0f;
+            font-family: Arial, sans-serif;
+            background: #0a0a0a;
             color: #ffffff;
             margin: 0;
             padding: 20px;
@@ -17,65 +17,71 @@
             min-height: 100vh;
         }
         .container {
-            background: #1c1c1c;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            background: #1a1a1a;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
             width: 100%;
-            max-width: 450px;
+            max-width: 800px;
             transition: transform 0.2s ease;
         }
         .container:hover {
-            transform: scale(1.02);
+            transform: scale(1.01);
         }
         h1 {
             text-align: center;
-            color: #00d4ff;
-            font-size: 26px;
+            color: #00ccff;
             margin-bottom: 20px;
-            font-weight: 500;
+            font-size: 24px;
         }
-        .login-box, .file-box {
+        .login-box {
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
-        .login-box {
-            align-items: center;
+        .login-options {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        .login-option {
+            padding: 10px 20px;
+            border-radius: 5px;
+            background: #2a2a2a;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .login-option.active, .login-option:hover {
+            background: #00ccff;
+            color: #000;
         }
         input, button, select {
             padding: 10px;
             border: none;
-            border-radius: 8px;
-            font-size: 14px;
+            border-radius: 5px;
             transition: all 0.3s ease;
+            font-size: 14px;
         }
         input, select {
             background: #2a2a2a;
             color: #fff;
-            width: 100%;
-            max-width: 300px;
         }
         input:focus, select:focus {
             outline: none;
-            box-shadow: 0 0 6px rgba(0, 212, 255, 0.5);
+            box-shadow: 0 0 5px #00ccff;
         }
         button {
-            background: #00d4ff;
+            background: #00ccff;
             color: #000;
             cursor: pointer;
-            font-weight: 600;
-            width: 100%;
-            max-width: 300px;
+            font-weight: bold;
         }
         button:hover {
-            background: #00b8e6;
+            background: #00b3e6;
             transform: translateY(-2px);
         }
         .password-wrapper {
             position: relative;
-            width: 100%;
-            max-width: 300px;
         }
         .toggle-password {
             position: absolute;
@@ -83,75 +89,136 @@
             top: 50%;
             transform: translateY(-50%);
             cursor: pointer;
-            color: #00d4ff;
+            color: #00ccff;
             font-size: 12px;
+        }
+        .fingerprint-box, .faceid-box {
+            text-align: center;
+            margin: 20px 0;
+            display: none;
+        }
+        .fingerprint-sensor, .faceid-sensor {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto;
+            background: radial-gradient(circle at center, #2a2a2a 0%, #1a1a1a 70%);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            transition: box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        .fingerprint-sensor:hover, .faceid-sensor:hover {
+            box-shadow: 0 0 20px rgba(0, 204, 255, 0.3);
+        }
+        .fingerprint-icon svg, .faceid-icon svg {
+            width: 60px;
+            height: 60px;
+            stroke: #00ccff;
+            transition: transform 0.3s ease, stroke 0.3s ease;
+        }
+        .fingerprint-icon.scanning svg, .faceid-icon.scanning svg {
+            transform: scale(1.1);
+            stroke: #00b3e6;
+            animation: pulseIcon 1.5s infinite;
+        }
+        @keyframes pulseIcon {
+            0% { transform: scale(1.1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1.1); }
+        }
+        .scan-wave {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 204, 255, 0.1);
+            border-radius: 50%;
+            transform: scale(0);
+            opacity: 0;
+            pointer-events: none;
+        }
+        .scan-wave.active {
+            animation: scanWave 2s infinite ease-out;
+        }
+        @keyframes scanWave {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        .file-box {
+            display: none;
+            flex-direction: column;
+            gap: 15px;
         }
         .search-bar {
             display: flex;
-            flex-direction: column;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
         }
         .file-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 20px;
-            max-height: 400px;
-            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
         }
         .file-item {
             background: #2a2a2a;
-            padding: 12px;
+            padding: 10px;
             border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            text-align: center;
             transition: all 0.3s ease;
+            cursor: pointer;
+            overflow: hidden;
         }
         .file-item:hover {
-            background: #383838;
-            transform: translateX(5px);
+            background: #3a3a3a;
+            transform: translateY(-3px);
         }
         .file-item img {
-            width: 32px;
-            height: 32px;
-            margin-right: 10px;
+            width: 40px;
+            height: 40px;
+            margin-bottom: 5px;
         }
-        .file-info {
-            flex-grow: 1;
-            font-size: 13px;
-        }
-        .file-info .file-name {
+        .file-item .file-name {
+            font-size: 12px;
             word-break: break-all;
-            max-width: 200px;
-            white-space: nowrap;
+            max-height: 40px;
             overflow: hidden;
             text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
         }
-        .file-info small {
+        .file-item small {
+            font-size: 10px;
             color: #aaaaaa;
-            font-size: 11px;
         }
-        .file-actions button {
-            padding: 6px 10px;
-            font-size: 12px;
-            margin-left: 5px;
+        .file-item .actions {
+            margin-top: 5px;
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+        }
+        .file-item .actions button {
+            padding: 5px;
+            font-size: 10px;
         }
         .preview-box {
-            margin-top: 20px;
+            margin-top: 15px;
             padding: 10px;
             background: #2a2a2a;
-            border-radius: 8px;
-            max-height: 350px;
+            border-radius: 5px;
+            max-height: 300px;
             overflow: auto;
         }
         .notification {
             position: fixed;
             top: 20px;
             right: 20px;
-            padding: 10px 20px;
-            border-radius: 6px;
+            padding: 10px 15px;
+            border-radius: 5px;
             color: #fff;
             opacity: 0;
             transition: opacity 0.5s ease;
@@ -172,14 +239,43 @@
     <div class="container" id="app">
         <h1>Hệ Thống Lưu Trữ File</h1>
         <div id="login" class="login-box">
-            <input type="text" id="username" placeholder="Email (khangleo138@gmail.com)" value="khangleo138@gmail.com">
-            <div class="password-wrapper">
-                <input type="password" id="password" placeholder="Password (132004)">
-                <span class="toggle-password" onclick="togglePassword()">Hiện</span>
+            <div class="login-options">
+                <div class="login-option active" onclick="selectLoginMethod('password')">Mật Khẩu</div>
+                <div class="login-option" onclick="selectLoginMethod('fingerprint')">Vân Tay</div>
+                <div class="login-option" onclick="selectLoginMethod('faceid')">Face ID</div>
             </div>
-            <button onclick="login()">Đăng Nhập</button>
+            <div id="passwordLogin" class="password-login">
+                <input type="text" id="username" placeholder="Username">
+                <div class="password-wrapper">
+                    <input type="password" id="password" placeholder="Password">
+                    <span class="toggle-password" onclick="togglePassword()">Hiện</span>
+                </div>
+                <button onclick="loginWithPassword()">Đăng Nhập</button>
+            </div>
+            <div id="fingerprintLogin" class="fingerprint-box">
+                <div class="fingerprint-sensor" id="fingerprintSensor">
+                    <div class="fingerprint-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#00ccff" stroke-width="1.5">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                    </div>
+                    <div class="scan-wave"></div>
+                </div>
+                <p id="fingerprintStatus">Đặt tay lên cảm biến để quét</p>
+            </div>
+            <div id="faceidLogin" class="faceid-box">
+                <div class="faceid-sensor" id="faceidSensor">
+                    <div class="faceid-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#00ccff" stroke-width="1.5">
+                            <path d="M12 2a4 4 0 00-4 4v2a4 4 0 008 0V6a4 4 0 00-4-4zM8 14a4 4 0 00-4 4v2h16v-2a4 4 0 00-4-4H8z"/>
+                        </svg>
+                    </div>
+                    <div class="scan-wave"></div>
+                </div>
+                <p id="faceidStatus">Nhìn vào cảm biến để quét</p>
+            </div>
         </div>
-        <div id="fileManager" class="file-box" style="display: none;">
+        <div id="fileManager" class="file-box">
             <div class="search-bar">
                 <input type="text" id="searchName" placeholder="Tìm theo tên..." onkeyup="searchFiles()">
                 <input type="date" id="searchDate" onchange="searchFiles()">
@@ -201,120 +297,168 @@
     </div>
     <div id="notification" class="notification"></div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js"></script>
-
     <script>
-        // Cấu hình Firebase từ bạn
-        const firebaseConfig = {
-            apiKey: "AIzaSyD7YQ9Q9mG2HytZJvqtyfbFPF7Mx08GUjQ",
-            authDomain: "k1vlu-fea31.firebaseapp.com",
-            projectId: "k1vlu-fea31",
-            storageBucket: "k1vlu-fea31.firebasestorage.app",
-            messagingSenderId: "201770048924",
-            appId: "1:201770048924:web:3e42026f8aba2d602ebc59",
-            measurementId: "G-5E5JEXXWNW"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const storage = firebase.storage();
-
-        let files = [];
+        const username = "khangsg138";
+        const password = "132004";
+        const MAX_FILE_SIZE = 1 * 1024 * 1024 * 1024; // 1GB
+        let currentMethod = 'password';
+        let isScanning = false;
 
         function showNotification(message, type) {
             const notification = document.getElementById("notification");
             notification.textContent = message;
             notification.className = `notification ${type} show`;
-            setTimeout(() => notification.className = "notification", 3000);
+            setTimeout(() => {
+                notification.className = "notification";
+            }, 3000);
         }
 
         function togglePassword() {
             const passInput = document.getElementById("password");
             const toggle = document.querySelector(".toggle-password");
-            passInput.type = passInput.type === "password" ? "text" : "password";
-            toggle.textContent = passInput.type === "password" ? "Hiện" : "Ẩn";
-        }
-
-        async function login() {
-            const email = document.getElementById("username").value; // Dùng trực tiếp email
-            const password = document.getElementById("password").value;
-            try {
-                await auth.signInWithEmailAndPassword(email, password).catch(async (error) => {
-                    if (error.code === "auth/user-not-found") {
-                        // Tạo tài khoản mới nếu chưa tồn tại
-                        await auth.createUserWithEmailAndPassword(email, password);
-                        showNotification("Tài khoản mới đã được tạo và đăng nhập!", "success");
-                    } else {
-                        throw error;
-                    }
-                });
-                document.getElementById("login").style.display = "none";
-                document.getElementById("fileManager").style.display = "block";
-                showNotification("Đăng nhập thành công!", "success");
-                loadFiles();
-            } catch (error) {
-                showNotification(error.message || "Lỗi đăng nhập!", "error");
+            if (passInput.type === "password") {
+                passInput.type = "text";
+                toggle.textContent = "Ẩn";
+            } else {
+                passInput.type = "password";
+                toggle.textContent = "Hiện";
             }
         }
 
-        async function uploadFile() {
+        function selectLoginMethod(method) {
+            currentMethod = method;
+            document.querySelectorAll('.login-option').forEach(opt => opt.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.getElementById('passwordLogin').style.display = method === 'password' ? 'block' : 'none';
+            document.getElementById('fingerprintLogin').style.display = method === 'fingerprint' ? 'block' : 'none';
+            document.getElementById('faceidLogin').style.display = method === 'faceid' ? 'block' : 'none';
+        }
+
+        function loginWithPassword() {
+            const userInput = document.getElementById("username").value;
+            const passInput = document.getElementById("password").value;
+            if (userInput === username && passInput === password) {
+                successfulLogin();
+            } else {
+                showNotification("Sai thông tin đăng nhập!", "error");
+            }
+        }
+
+        function startFingerprintScan() {
+            if (isScanning) return;
+            isScanning = true;
+            const fingerprintIcon = document.querySelector('.fingerprint-icon');
+            const scanWave = document.querySelector('#fingerprintLogin .scan-wave');
+            const statusText = document.getElementById('fingerprintStatus');
+
+            fingerprintIcon.classList.add('scanning');
+            scanWave.classList.add('active');
+            statusText.textContent = 'Đang quét vân tay...';
+
+            setTimeout(() => {
+                fingerprintIcon.classList.remove('scanning');
+                scanWave.classList.remove('active');
+                const isSuccess = Math.random() > 0.3; // 70% success
+                if (isSuccess) {
+                    statusText.textContent = 'Xác thực thành công!';
+                    successfulLogin();
+                } else {
+                    statusText.textContent = 'Vân tay không khớp!';
+                    showNotification('Xác thực thất bại!', 'error');
+                    setTimeout(() => {
+                        statusText.textContent = 'Đặt tay lên cảm biến để quét';
+                        isScanning = false;
+                    }, 3000);
+                }
+            }, 2000);
+        }
+
+        function startFaceIdScan() {
+            if (isScanning) return;
+            isScanning = true;
+            const faceidIcon = document.querySelector('.faceid-icon');
+            const scanWave = document.querySelector('#faceidLogin .scan-wave');
+            const statusText = document.getElementById('faceidStatus');
+
+            faceidIcon.classList.add('scanning');
+            scanWave.classList.add('active');
+            statusText.textContent = 'Đang quét khuôn mặt...';
+
+            setTimeout(() => {
+                faceidIcon.classList.remove('scanning');
+                scanWave.classList.remove('active');
+                const isSuccess = Math.random() > 0.3; // 70% success
+                if (isSuccess) {
+                    statusText.textContent = 'Xác thực thành công!';
+                    successfulLogin();
+                } else {
+                    statusText.textContent = 'Khuôn mặt không khớp!';
+                    showNotification('Xác thực thất bại!', 'error');
+                    setTimeout(() => {
+                        statusText.textContent = 'Nhìn vào cảm biến để quét';
+                        isScanning = false;
+                    }, 3000);
+                }
+            }, 2000);
+        }
+
+        function successfulLogin() {
+            document.getElementById("login").style.display = "none";
+            document.getElementById("fileManager").style.display = "block";
+            showNotification("Đăng nhập thành công!", "success");
+            loadFiles();
+        }
+
+        document.getElementById('fingerprintSensor').addEventListener('click', startFingerprintScan);
+        document.getElementById('faceidSensor').addEventListener('click', startFaceIdScan);
+
+        function uploadFile() {
             const fileInput = document.getElementById("fileInput");
             const file = fileInput.files[0];
             if (!file) return;
-            if (file.size > 1 * 1024 * 1024 * 1024) {
+
+            if (file.size > MAX_FILE_SIZE) {
                 showNotification("File vượt quá 1GB!", "error");
                 return;
             }
 
-            const storageRef = storage.ref(`files/${auth.currentUser.uid}/${file.name}`);
-            try {
-                await storageRef.put(file);
-                const url = await storageRef.getDownloadURL();
+            const reader = new FileReader();
+            reader.onload = function(e) {
                 const fileData = {
                     name: file.name,
-                    url: url,
+                    type: file.type,
                     size: file.size,
                     date: new Date().toISOString(),
-                    type: file.type
+                    data: e.target.result
                 };
-                files.push(fileData);
+                saveFile(fileData);
                 loadFiles();
                 showNotification(`Đã tải lên ${file.name}!`, "success");
-            } catch (error) {
-                showNotification("Lỗi khi tải file!", "error");
-            }
+            };
+            reader.readAsDataURL(file);
         }
 
-        async function loadFiles(filteredFiles = null) {
+        function saveFile(fileData) {
+            let files = JSON.parse(localStorage.getItem("files") || "[]");
+            files.push(fileData);
+            localStorage.setItem("files", JSON.stringify(files));
+        }
+
+        function loadFiles(filteredFiles = null) {
             const fileList = document.getElementById("fileList");
             fileList.innerHTML = "";
-            if (!filteredFiles) {
-                const res = await storage.ref(`files/${auth.currentUser.uid}`).listAll();
-                files = await Promise.all(res.items.map(async item => {
-                    const url = await item.getDownloadURL();
-                    const metadata = await item.getMetadata();
-                    return {
-                        name: item.name,
-                        url: url,
-                        size: metadata.size,
-                        date: metadata.timeCreated,
-                        type: metadata.contentType
-                    };
-                }));
-            }
-            (filteredFiles || files).forEach((file, index) => {
+            const files = filteredFiles || JSON.parse(localStorage.getItem("files") || "[]");
+
+            files.forEach((file, index) => {
                 const icon = getFileIcon(file.type);
                 const div = document.createElement("div");
                 div.className = "file-item";
                 div.innerHTML = `
                     <img src="${icon}" alt="icon">
-                    <div class="file-info">
-                        <div class="file-name">${file.name}</div>
-                        <small>${new Date(file.date).toLocaleDateString()} - ${(file.size / 1024 / 1024).toFixed(2)} MB</small>
-                    </div>
-                    <div class="file-actions">
+                    <div class="file-name">${file.name}</div>
+                    <small>${new Date(file.date).toLocaleDateString()}</small>
+                    <div class="actions">
                         <button onclick="previewFile(${index})">Xem</button>
                         <button onclick="downloadFile(${index})">Tải</button>
                         <button onclick="deleteFile(${index})">Xóa</button>
@@ -334,34 +478,39 @@
         }
 
         function previewFile(index) {
+            const files = JSON.parse(localStorage.getItem("files") || "[]");
             const file = files[index];
             const preview = document.getElementById("preview");
+
             if (file.type.includes("pdf")) {
-                preview.innerHTML = `<embed src="${file.url}" width="100%" height="350px" type="application/pdf">`;
+                preview.innerHTML = `<embed src="${file.data}" width="100%" height="300px" type="application/pdf">`;
             } else if (file.type.includes("image")) {
-                preview.innerHTML = `<img src="${file.url}" style="max-width: 100%;">`;
+                preview.innerHTML = `<img src="${file.data}" style="max-width: 100%;">`;
+            } else if (file.type.includes("word") || file.type.includes("excel") || file.type.includes("powerpoint")) {
+                preview.innerHTML = "Tính năng xem trước Word/Excel/PPT đang phát triển.";
             } else {
                 preview.innerHTML = "Không hỗ trợ xem trước loại file này.";
             }
         }
 
         function downloadFile(index) {
+            const files = JSON.parse(localStorage.getItem("files") || "[]");
             const file = files[index];
-            window.open(file.url, "_blank");
+            const link = document.createElement("a");
+            link.href = file.data;
+            link.download = file.name;
+            link.click();
             showNotification(`Đang tải ${file.name}...`, "success");
         }
 
-        async function deleteFile(index) {
-            const file = files[index];
-            try {
-                await storage.refFromURL(file.url).delete();
-                files.splice(index, 1);
-                loadFiles();
-                document.getElementById("preview").innerHTML = "";
-                showNotification(`Đã xóa ${file.name}!`, "success");
-            } catch (error) {
-                showNotification("Lỗi khi xóa file!", "error");
-            }
+        function deleteFile(index) {
+            let files = JSON.parse(localStorage.getItem("files") || "[]");
+            const fileName = files[index].name;
+            files.splice(index, 1);
+            localStorage.setItem("files", JSON.stringify(files));
+            loadFiles();
+            document.getElementById("preview").innerHTML = "";
+            showNotification(`Đã xóa ${fileName}!`, "success");
         }
 
         function searchFiles() {
@@ -369,12 +518,14 @@
             const searchDate = document.getElementById("searchDate").value;
             const searchType = document.getElementById("searchType").value;
 
+            let files = JSON.parse(localStorage.getItem("files") || "[]");
             const filteredFiles = files.filter(file => {
                 const matchesName = file.name.toLowerCase().includes(searchName);
                 const matchesDate = searchDate ? new Date(file.date).toISOString().split("T")[0] === searchDate : true;
                 const matchesType = searchType ? file.type.includes(searchType) : true;
                 return matchesName && matchesDate && matchesType;
             });
+
             loadFiles(filteredFiles);
         }
     </script>
