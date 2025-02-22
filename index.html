@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Group</title>
+    <title>Hệ thống Nhắn tin Nhóm</title>
     <style>
         * {
             margin: 0;
@@ -16,58 +16,60 @@
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            padding: 20px;
+            padding: 10px;
         }
         .container {
             width: 100%;
             max-width: 1000px;
             display: flex;
-            gap: 20px;
+            flex-direction: column;
+            gap: 10px;
         }
         .sidebar {
-            width: 300px;
             background: white;
             border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         .chat-area {
-            flex: 1;
             background: white;
             border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             display: flex;
             flex-direction: column;
+            flex: 1;
         }
         .login-form {
             background: white;
-            padding: 25px;
+            padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
             margin: 0 auto;
-            width: 400px;
         }
         h2 {
             color: #2c3e50;
-            margin-bottom: 20px;
-            font-size: 1.5em;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            text-align: center;
         }
         .user-list {
             list-style: none;
-            max-height: 400px;
+            max-height: 200px;
             overflow-y: auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
         }
         .user-list li {
-            padding: 10px;
-            border-radius: 6px;
-            margin: 5px 0;
+            padding: 8px 12px;
+            border-radius: 20px;
             background: #f5f5f5;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             cursor: pointer;
             transition: background 0.3s;
+            font-size: 0.9em;
         }
         .user-list li:hover {
             background: #e0e0e0;
@@ -79,17 +81,19 @@
         .messages {
             flex: 1;
             overflow-y: auto;
-            padding: 15px;
+            padding: 10px;
             background: #fafafa;
             border-radius: 8px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
+            min-height: 200px;
         }
         .message {
-            margin: 10px 0;
-            padding: 12px;
+            margin: 8px 0;
+            padding: 10px;
             border-radius: 6px;
-            max-width: 70%;
+            max-width: 80%;
             word-wrap: break-word;
+            font-size: 0.9em;
         }
         .message.sent {
             background: #2196f3;
@@ -103,57 +107,61 @@
             margin-right: auto;
         }
         .message-time {
-            font-size: 0.8em;
+            font-size: 0.7em;
             opacity: 0.7;
-            margin-top: 5px;
+            margin-top: 3px;
         }
         .input-area {
             display: flex;
-            gap: 10px;
-            align-items: center;
+            gap: 5px;
+            flex-wrap: wrap;
         }
         input, textarea {
-            padding: 12px;
+            padding: 10px;
             border: 1px solid #ddd;
             border-radius: 6px;
             flex: 1;
             resize: none;
+            font-size: 0.9em;
         }
         input:focus, textarea:focus {
             border-color: #2196f3;
             outline: none;
         }
         button {
-            padding: 12px 20px;
+            padding: 10px 15px;
             background: #2196f3;
             color: white;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             transition: background 0.3s;
+            font-size: 0.9em;
         }
         button:hover {
             background: #1976d2;
         }
         .user-info {
-            padding: 10px;
+            padding: 8px;
             background: #fff3e0;
             border-radius: 6px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
+            font-size: 0.9em;
         }
         .notification {
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: 10px;
+            right: 10px;
             background: #4caf50;
             color: white;
-            padding: 10px 20px;
+            padding: 8px 15px;
             border-radius: 6px;
             display: none;
             z-index: 1000;
+            font-size: 0.9em;
         }
         #cameraModal {
             display: none;
@@ -162,15 +170,32 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background: white;
-            padding: 20px;
+            padding: 15px;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
             z-index: 1000;
+            width: 90%;
+            max-width: 400px;
         }
         #cameraModal video, #cameraModal canvas {
             width: 100%;
-            max-width: 400px;
             border-radius: 6px;
+        }
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row;
+            }
+            .sidebar {
+                width: 250px;
+                min-width: 200px;
+            }
+            .user-list {
+                flex-direction: column;
+                flex-wrap: nowrap;
+            }
+            .messages {
+                min-height: 400px;
+            }
         }
     </style>
 </head>
@@ -185,7 +210,7 @@
 
     <div class="container" id="chatContainer" style="display: none;">
         <div class="sidebar">
-            <h2>Danh sách thành viên</h2>
+            <h2>Danh sách</h2>
             <ul class="user-list" id="userList"></ul>
         </div>
         <div class="chat-area">
@@ -197,7 +222,7 @@
             <div class="input-area">
                 <textarea id="messageInput" placeholder="Nhập tin nhắn..." rows="2"></textarea>
                 <input type="file" id="fileInput">
-                <button onclick="openCamera()">Chụp ảnh</button>
+                <button onclick="openCamera()">Chụp</button>
                 <button onclick="sendMessage()">Gửi</button>
             </div>
         </div>
@@ -227,7 +252,7 @@
                 currentUser = savedUser;
                 document.getElementById('loginForm').style.display = 'none';
                 document.getElementById('chatContainer').style.display = 'flex';
-                document.getElementById('userInfo').textContent = `Đã đăng nhập: ${currentUser}`;
+                document.getElementById('userInfo').textContent = `Đăng nhập: ${currentUser}`;
                 loadUsers();
                 loadMessages();
             }
@@ -252,7 +277,7 @@
             localStorage.setItem('currentUser', currentUser);
             document.getElementById('loginForm').style.display = 'none';
             document.getElementById('chatContainer').style.display = 'flex';
-            document.getElementById('userInfo').textContent = `Đăng nhập: ${username}`;
+            document.getElementById('userInfo').textContent = `Đăng nhập: ${currentUser}`;
             loadUsers();
             loadMessages();
         }
@@ -265,6 +290,10 @@
             document.getElementById('username').value = '';
             document.getElementById('pin').value = '';
             document.getElementById('error').textContent = '';
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
         }
 
         function loadUsers() {
@@ -272,14 +301,12 @@
             let messages = JSON.parse(localStorage.getItem('messages') || '{}');
             userList.innerHTML = '';
 
-            // Nhóm tổng
             const groupItem = document.createElement('li');
             groupItem.textContent = 'Nhóm Tổng';
             groupItem.onclick = () => { currentChat = GROUP_CHAT; loadMessages(); };
             groupItem.classList.add(currentChat === GROUP_CHAT ? 'active' : '');
             userList.appendChild(groupItem);
 
-            // Admin cho nhân viên hoặc ngược lại
             if (currentUser !== ADMIN_USERNAME) {
                 const adminItem = document.createElement('li');
                 adminItem.textContent = ADMIN_USERNAME;
@@ -306,8 +333,7 @@
 
             let chatMessages = messages[currentChat] || [];
             if (currentChat !== GROUP_CHAT) {
-                // Tin nhắn riêng giữa admin và nhân viên
-                chatMessages = (messages[currentChat] || []).filter(msg => 
+                chatMessages = chatMessages.filter(msg => 
                     (msg.from === currentUser && msg.to === currentChat) || 
                     (msg.from === currentChat && msg.to === currentUser)
                 );
@@ -315,7 +341,7 @@
 
             const currentCount = chatMessages.length;
             if (!lastMessageCount[currentChat]) lastMessageCount[currentChat] = 0;
-            if (currentCount > lastMessageCount[currentChat] && currentUser !== msg.from) {
+            if (currentCount > lastMessageCount[currentChat] && currentUser !== chatMessages[chatMessages.length - 1]?.from) {
                 showNotification();
                 lastMessageCount[currentChat] = currentCount;
             }
@@ -329,9 +355,7 @@
         function showNotification() {
             const notification = document.getElementById('notification');
             notification.style.display = 'block';
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 3000);
+            setTimeout(() => notification.style.display = 'none', 3000);
         }
 
         function sendMessage() {
@@ -343,7 +367,12 @@
             if (!text && !file) return;
 
             const timestamp = new Date().toLocaleString();
-            let message = { text, timestamp, from: currentUser, to: currentChat === GROUP_CHAT ? null : currentChat };
+            let message = { 
+                text, 
+                timestamp, 
+                from: currentUser, 
+                to: currentChat === GROUP_CHAT ? null : currentChat 
+            };
 
             if (file) {
                 const reader = new FileReader();
@@ -377,7 +406,7 @@
             let content = `<strong>${msg.from}</strong>: ${msg.text || ''}`;
             if (msg.file) {
                 if (msg.file.type.startsWith('image/')) {
-                    content += `<br><img src="${msg.file.data}" style="max-width: 250px; border-radius: 4px;">`;
+                    content += `<br><img src="${msg.file.data}" style="max-width: 100%; border-radius: 4px;">`;
                 } else {
                     content += `<br>File: <a href="${msg.file.data}" download="${msg.file.name}" style="color: ${type === 'sent' ? '#fff' : '#2196f3'}">${msg.file.name}</a>`;
                 }
