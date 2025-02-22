@@ -5,58 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Máy Chủ Quản Trị Chấm Công</title>
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            background: #fff;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            width: 600px;
-            text-align: center;
-        }
-        h1 {
-            color: #2c3e50;
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
-        .checkin-list {
-            max-height: 400px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 10px;
-            text-align: left;
-        }
-        .checkin-item {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            color: #333;
-        }
-        .checkin-item:last-child {
-            border-bottom: none;
-        }
-        #notification {
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 5px;
-            display: none;
-        }
-        .success {
-            background: #2ecc71;
-            color: #fff;
-        }
-        .error {
-            background: #e74c3c;
-            color: #fff;
-        }
+        /* Giữ nguyên style từ trước */
+        body { font-family: 'Arial', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); width: 600px; text-align: center; }
+        h1 { color: #2c3e50; font-size: 24px; margin-bottom: 20px; }
+        .checkin-list { max-height: 400px; overflow-y: auto; border: 1px solid #ddd; border-radius: 5px; padding: 10px; text-align: left; }
+        .checkin-item { padding: 10px; border-bottom: 1px solid #eee; color: #333; }
+        .checkin-item:last-child { border-bottom: none; }
+        #notification { margin-top: 20px; padding: 10px; border-radius: 5px; display: none; }
+        .success { background: #2ecc71; color: #fff; }
+        .error { background: #e74c3c; color: #fff; }
     </style>
 </head>
 <body>
@@ -70,27 +28,23 @@
         const socket = new WebSocket('ws://localhost:8080');
         const checkinList = document.getElementById('checkinList');
 
-        // Kiểm tra kết nối WebSocket
-        socket.onopen = () => {
-            console.log("Đã kết nối với máy chủ");
-        };
-        socket.onerror = (err) => {
-            console.error("Lỗi WebSocket: ", err);
-            showNotification("Không thể kết nối với máy chủ!", "error");
-        };
+        // Log trạng thái WebSocket
+        socket.onopen = () => showNotification("Đã kết nối tới máy chủ!", "success");
+        socket.onclose = () => showNotification("Mất kết nối với máy chủ!", "error");
+        socket.onerror = (err) => showNotification("Lỗi kết nối WebSocket!", "error");
 
-        // Nhận dữ liệu từ máy chấm công phụ
+        // Nhận dữ liệu
         socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
             addCheckInToList(data);
         };
 
-        // Hàm thêm lượt chấm công vào danh sách
+        // Thêm vào danh sách
         function addCheckInToList(data) {
             const checkinItem = document.createElement('div');
             checkinItem.className = 'checkin-item';
             checkinItem.textContent = `Mã NV: ${data.employeeId} | Thời gian: ${data.timestamp} | Thiết bị: ${data.device}`;
-            checkinList.prepend(checkinItem); // Thêm vào đầu danh sách
+            checkinList.prepend(checkinItem);
             showNotification(`Nhận chấm công mới từ ${data.device}!`, "success");
         }
 
@@ -100,9 +54,7 @@
             notification.style.display = 'block';
             notification.className = type;
             notification.textContent = message;
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 3000);
+            setTimeout(() => notification.style.display = 'none', 3000);
         }
     </script>
 </body>
