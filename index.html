@@ -546,50 +546,57 @@
 
         // Lưu thành PDF
         function saveAsPdf() {
-            const ticket = tickets[currentTicketIndex];
-            const doc = new jsPDF();
-            let y = 10;
+            try {
+                const ticket = tickets[currentTicketIndex];
+                const doc = new jsPDF();
+                doc.setFont("helvetica"); // Sử dụng font mặc định hỗ trợ Unicode
+                let y = 10;
 
-            // Tiêu đề
-            doc.setFontSize(16);
-            doc.setTextColor(26, 115, 232); // Màu xanh #1a73e8
-            doc.text(`Phiếu Tiếp Nhận #${currentTicketIndex + 1}`, 10, y);
-            y += 10;
+                // Tiêu đề
+                doc.setFontSize(16);
+                doc.setTextColor(26, 115, 232); // Màu xanh #1a73e8
+                doc.text(`Phiếu Tiếp Nhận #${currentTicketIndex + 1}`, 10, y);
+                y += 10;
 
-            // Thông tin cơ bản
-            doc.setFontSize(12);
-            doc.setTextColor(68, 68, 68); // Màu xám #444
-            doc.text(`Ngày: ${ticket.date || 'Chưa ghi'}`, 10, y); y += 7;
-            doc.text(`Khách hàng: ${ticket.customer || 'Chưa ghi'}`, 10, y); y += 7;
-            doc.text(`VIN#: ${ticket.vin}`, 10, y); y += 7;
-            doc.text(`Loại: ${ticket.type || 'Chưa ghi'}`, 10, y); y += 7;
-            doc.text(`Năm: ${ticket.year || 'Chưa ghi'}`, 10, y); y += 7;
-            doc.text(`Số km: ${ticket.km || 'Chưa ghi'}`, 10, y); y += 7;
-            doc.text(`Triệu hồi/Recall: ${ticket.recall || 'Chưa ghi'}`, 10, y); y += 7;
-            doc.text(`Kỹ thuật viên: ${ticket.technician || 'Chưa ghi'}`, 10, y); y += 7;
-            doc.text(`Biển số#: ${ticket.plate}`, 10, y); y += 7;
-            doc.text(`Hình thức thanh toán: ${ticket.payment.length ? ticket.payment.join(', ') : 'Chưa chọn'}`, 10, y); y += 7;
-            doc.setTextColor(40, 167, 69); // Màu xanh lá #28a745
-            doc.text(`Trạng thái: ${ticket.status === 'received' ? 'Đã tiếp nhận' : 'Chưa tiếp nhận'}`, 10, y); y += 10;
+                // Thông tin cơ bản
+                doc.setFontSize(12);
+                doc.setTextColor(68, 68, 68); // Màu xám #444
+                doc.text(`Ngày: ${ticket.date || 'Chưa ghi'}`, 10, y); y += 7;
+                doc.text(`Khách hàng: ${ticket.customer || 'Chưa ghi'}`, 10, y); y += 7;
+                doc.text(`VIN#: ${ticket.vin}`, 10, y); y += 7;
+                doc.text(`Loại: ${ticket.type || 'Chưa ghi'}`, 10, y); y += 7;
+                doc.text(`Năm: ${ticket.year || 'Chưa ghi'}`, 10, y); y += 7;
+                doc.text(`Số km: ${ticket.km || 'Chưa ghi'}`, 10, y); y += 7;
+                doc.text(`Triệu hồi/Recall: ${ticket.recall || 'Chưa ghi'}`, 10, y); y += 7;
+                doc.text(`Kỹ thuật viên: ${ticket.technician || 'Chưa ghi'}`, 10, y); y += 7;
+                doc.text(`Biển số#: ${ticket.plate}`, 10, y); y += 7;
+                doc.text(`Hình thức thanh toán: ${ticket.payment.length ? ticket.payment.join(', ') : 'Chưa chọn'}`, 10, y); y += 7;
+                doc.setTextColor(40, 167, 69); // Màu xanh lá #28a745
+                doc.text(`Trạng thái: ${ticket.status === 'received' ? 'Đã tiếp nhận' : 'Chưa tiếp nhận'}`, 10, y); y += 10;
 
-            // Về xe
-            doc.setFontSize(14);
-            doc.setTextColor(26, 115, 232);
-            doc.text('Về xe:', 10, y); y += 7;
-            doc.setFontSize(12);
-            for (const [part, { status, note }] of Object.entries(ticket.vehicle)) {
-                doc.setTextColor(status === 'P' ? [230, 57, 70] : [68, 68, 68]); // Đỏ #e63946 cho "P", xám #444 cho "OK"
-                doc.text(`${part.replace(/_/g, ' ').toUpperCase()}: ${status}${status === 'P' && note ? ' - ' + note : ''}`, 10, y);
-                y += 7;
-                if (y > 270) { // Chuyển sang trang mới nếu hết chỗ
-                    doc.addPage();
-                    y = 10;
+                // Về xe
+                doc.setFontSize(14);
+                doc.setTextColor(26, 115, 232);
+                doc.text('Về xe:', 10, y); y += 7;
+                doc.setFontSize(12);
+                for (const [part, { status, note }] of Object.entries(ticket.vehicle)) {
+                    const text = `${part.replace(/_/g, ' ').toUpperCase()}: ${status}${status === 'P' && note ? ' - ' + note : ''}`;
+                    doc.setTextColor(status === 'P' ? [230, 57, 70] : [68, 68, 68]); // Đỏ #e63946 cho "P", xám #444 cho "OK"
+                    doc.text(text, 10, y);
+                    y += 7;
+                    if (y > 270) { // Chuyển sang trang mới nếu hết chỗ
+                        doc.addPage();
+                        y = 10;
+                    }
                 }
-            }
 
-            // Lưu file
-            doc.save(`Phieu_Tiep_Nhan_${currentTicketIndex + 1}.pdf`);
-            closePopup();
+                // Lưu file
+                doc.save(`Phieu_Tiep_Nhan_${currentTicketIndex + 1}.pdf`);
+                closePopup();
+            } catch (error) {
+                console.error('Lỗi khi lưu PDF:', error);
+                alert('Có lỗi xảy ra khi lưu PDF. Vui lòng thử lại!');
+            }
         }
 
         // Đóng pop-up khi nhấn ngoài
