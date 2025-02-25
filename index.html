@@ -4,109 +4,156 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ thống quản lý đơn phiếu tiếp nhận xe</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f9;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(to bottom, #e9eef5, #f4f6f9);
             margin: 0;
             padding: 20px;
+            color: #333;
         }
         .container {
             display: flex;
-            gap: 20px;
-            max-width: 1200px;
+            gap: 25px;
+            max-width: 1300px;
             margin: 0 auto;
+            flex-wrap: wrap;
         }
         .column {
             flex: 1;
             background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+            min-width: 320px;
+            transition: transform 0.2s;
+        }
+        .column:hover {
+            transform: translateY(-5px);
         }
         .column h2 {
-            margin-top: 0;
-            color: #333;
-            font-size: 20px;
-            border-bottom: 2px solid #007bff;
+            margin: 0 0 15px;
+            color: #1a73e8;
+            font-size: 24px;
+            font-weight: 600;
+            border-bottom: 3px solid #1a73e8;
             padding-bottom: 10px;
         }
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
         .form-group label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #555;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #444;
         }
         .form-group input, .form-group textarea {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            padding: 10px;
+            border: 1px solid #ccd0d5;
+            border-radius: 8px;
             box-sizing: border-box;
-            transition: border-color 0.3s;
+            font-size: 14px;
+            transition: border-color 0.3s, box-shadow 0.3s;
         }
         .form-group input:focus, .form-group textarea:focus {
-            border-color: #007bff;
+            border-color: #1a73e8;
+            box-shadow: 0 0 5px rgba(26, 115, 232, 0.3);
             outline: none;
         }
         .form-group input[required] + label::after {
             content: " *";
-            color: red;
+            color: #e63946;
         }
         .checkbox-group {
             display: flex;
-            gap: 15px;
-            margin-top: 5px;
+            gap: 20px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .checkbox-group label {
+            font-size: 14px;
+            color: #555;
         }
         .buttons {
-            margin-top: 20px;
+            margin-top: 25px;
             display: flex;
-            gap: 10px;
+            gap: 15px;
+            flex-wrap: wrap;
         }
         .buttons button {
-            padding: 10px 20px;
+            padding: 12px 25px;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .buttons button:hover {
+            transform: translateY(-2px);
         }
         .buttons .save-btn {
-            background-color: #007bff;
+            background-color: #1a73e8;
             color: #fff;
         }
         .buttons .save-btn:hover {
-            background-color: #0056b3;
+            background-color: #1557b0;
         }
         .buttons .clear-btn {
-            background-color: #dc3545;
+            background-color: #e63946;
             color: #fff;
         }
         .buttons .clear-btn:hover {
-            background-color: #b02a37;
+            background-color: #b32d39;
         }
         .ticket-list {
-            max-height: 500px;
+            max-height: 600px;
             overflow-y: auto;
         }
         .ticket-item {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
+            padding: 15px;
+            border-bottom: 1px solid #eef2f7;
             cursor: pointer;
             transition: background-color 0.3s;
         }
-        .ticket-item:hover {
-            background-color: #f8f9fa;
+        .ticket-item.received {
+            background-color: #e6ffe6;
+            border-left: 4px solid #28a745;
         }
         .ticket-item span {
             display: block;
             font-size: 14px;
-            color: #666;
+            color: #555;
+            margin: 3px 0;
         }
 
-        /* Pop-up CSS */
+        /* Phần "Về xe" */
+        .vehicle-check {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .vehicle-check label {
+            width: 140px;
+            font-size: 14px;
+            color: #444;
+        }
+        .vehicle-check select {
+            padding: 6px;
+            border-radius: 5px;
+            border: 1px solid #ccd0d5;
+        }
+        .vehicle-check input[type="text"] {
+            width: calc(100% - 250px);
+            display: none;
+            padding: 6px;
+        }
+
+        /* Pop-up */
         .popup {
             display: none;
             position: fixed;
@@ -114,48 +161,104 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
         .popup-content {
             background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            width: 400px;
-            max-height: 80vh;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 1000px;
+            max-height: 85vh;
             overflow-y: auto;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
             animation: fadeIn 0.3s ease-in-out;
         }
         .popup-content h3 {
-            margin-top: 0;
-            color: #333;
-            border-bottom: 1px solid #ddd;
+            margin: 0 0 20px;
+            color: #1a73e8;
+            font-size: 22px;
+            font-weight: 600;
+            border-bottom: 2px solid #1a73e8;
             padding-bottom: 10px;
         }
         .popup-content p {
-            margin: 10px 0;
+            margin: 8px 0;
             font-size: 14px;
-            color: #555;
+            color: #444;
         }
-        .popup-content .close-btn {
-            float: right;
-            background: #dc3545;
-            color: #fff;
+        .popup-content p.problem {
+            font-weight: bold;
+            color: #e63946;
+        }
+        .popup-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        .popup-buttons button {
+            padding: 10px 20px;
             border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, transform 0.2s;
         }
-        .popup-content .close-btn:hover {
-            background: #b02a37;
+        .popup-buttons button:hover {
+            transform: translateY(-2px);
+        }
+        .popup-buttons .edit-btn {
+            background-color: #ffc107;
+            color: #fff;
+        }
+        .popup-buttons .edit-btn:hover {
+            background-color: #e0a800;
+        }
+        .popup-buttons .delete-btn {
+            background-color: #e63946;
+            color: #fff;
+        }
+        .popup-buttons .delete-btn:hover {
+            background-color: #b32d39;
+        }
+        .popup-buttons .pdf-btn {
+            background-color: #28a745;
+            color: #fff;
+        }
+        .popup-buttons .pdf-btn:hover {
+            background-color: #218838;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .column {
+                width: 100%;
+                padding: 20px;
+            }
+            .vehicle-check label {
+                width: 100px;
+            }
+            .vehicle-check input[type="text"] {
+                width: calc(100% - 180px);
+            }
+            .popup-content {
+                width: 95%;
+                max-width: none;
+                padding: 20px;
+            }
         }
     </style>
 </head>
@@ -212,7 +315,40 @@
                 </div>
                 <div class="form-group">
                     <label>Về xe</label>
-                    <textarea name="notes" rows="3" placeholder="Ghi chú về tình trạng xe hoặc yêu cầu"></textarea>
+                    <!-- Phần Left -->
+                    <div class="vehicle-check"><label>Côn</label><select name="clutch"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="clutch_note"></div>
+                    <div class="vehicle-check"><label>Động cơ</label><select name="engine"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="engine_note"></div>
+                    <div class="vehicle-check"><label>Còi</label><select name="horn"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="horn_note"></div>
+                    <div class="vehicle-check"><label>Chống nghiêng</label><select name="lean"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="lean_note"></div>
+                    <div class="vehicle-check"><label>Gác chân</label><select name="footrest_left"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="footrest_left_note"></div>
+                    <!-- Phần Right -->
+                    <div class="vehicle-check"><label>Truyền động</label><select name="transmission"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="transmission_note"></div>
+                    <div class="vehicle-check"><label>Phun xăng</label><select name="fuel_injection"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="fuel_injection_note"></div>
+                    <div class="vehicle-check"><label>Tay ga</label><select name="throttle"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="throttle_note"></div>
+                    <div class="vehicle-check"><label>Ống xả</label><select name="exhaust"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="exhaust_note"></div>
+                    <div class="vehicle-check"><label>Cần đạp phanh</label><select name="brake_pedal"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="brake_pedal_note"></div>
+                    <div class="vehicle-check"><label>Gác chân</label><select name="footrest_right"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="footrest_right_note"></div>
+                    <!-- Phần Rear -->
+                    <div class="vehicle-check"><label>Đèn đuôi</label><select name="tail_light"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="tail_light_note"></div>
+                    <div class="vehicle-check"><label>Xi nhan</label><select name="turn_signal_rear"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="turn_signal_rear_note"></div>
+                    <div class="vehicle-check"><label>Đèn phanh</label><select name="brake_light"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="brake_light_note"></div>
+                    <div class="vehicle-check"><label>Phanh</label><select name="brake_rear"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="brake_rear_note"></div>
+                    <div class="vehicle-check"><label>Hộp dầu phanh</label><select name="brake_fluid"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="brake_fluid_note"></div>
+                    <div class="vehicle-check"><label>Giảm xóc sau</label><select name="rear_shock"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="rear_shock_note"></div>
+                    <div class="vehicle-check"><label>Bánh sau</label><select name="rear_wheel"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="rear_wheel_note"></div>
+                    <!-- Phần Trên -->
+                    <div class="vehicle-check"><label>Tay lái</label><select name="handlebar"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="handlebar_note"></div>
+                    <div class="vehicle-check"><label>Bình xăng</label><select name="fuel_tank"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="fuel_tank_note"></div>
+                    <div class="vehicle-check"><label>Tay phanh</label><select name="brake_lever"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="brake_lever_note"></div>
+                    <div class="vehicle-check"><label>Chắn bùn</label><select name="mudguard"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="mudguard_note"></div>
+                    <div class="vehicle-check"><label>Yên</label><select name="seat"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="seat_note"></div>
+                    <!-- Phần Trước -->
+                    <div class="vehicle-check"><label>Đèn pha</label><select name="headlight"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="headlight_note"></div>
+                    <div class="vehicle-check"><label>Xi nhan</label><select name="turn_signal_front"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="turn_signal_front_note"></div>
+                    <div class="vehicle-check"><label>Bánh trước</label><select name="front_wheel"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="front_wheel_note"></div>
+                    <div class="vehicle-check"><label>Gương chiếu hậu</label><select name="mirror"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="mirror_note"></div>
+                    <div class="vehicle-check"><label>Giảm xóc trước</label><select name="front_shock"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="front_shock_note"></div>
+                    <div class="vehicle-check"><label>Tay nắm</label><select name="grip"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="grip_note"></div>
                 </div>
                 <div class="buttons">
                     <button type="submit" class="save-btn">Lưu phiếu</button>
@@ -224,30 +360,42 @@
         <!-- Cột danh sách phiếu đã lưu -->
         <div class="column">
             <h2>Danh sách phiếu đã lưu</h2>
-            <div class="ticket-list" id="ticketList">
-                <!-- Phiếu sẽ được thêm bằng JavaScript -->
-            </div>
+            <div class="ticket-list" id="ticketList"></div>
         </div>
     </div>
 
     <!-- Pop-up chi tiết -->
     <div class="popup" id="ticketPopup">
-        <div class="popup-content">
-            <button class="close-btn" onclick="closePopup()">Đóng</button>
+        <div class="popup-content" id="popupContent">
             <h3>Chi tiết phiếu</h3>
             <div id="popupDetails"></div>
+            <div class="popup-buttons">
+                <button class="edit-btn" onclick="editTicket()">Sửa</button>
+                <button class="delete-btn" onclick="deleteTicket()">Xóa</button>
+                <button class="pdf-btn" onclick="saveAsPdf()">Lưu PDF</button>
+            </div>
         </div>
     </div>
 
     <script>
+        const { jsPDF } = window.jspdf;
         const form = document.getElementById('ticketForm');
         const ticketList = document.getElementById('ticketList');
         const popup = document.getElementById('ticketPopup');
         const popupDetails = document.getElementById('popupDetails');
         let tickets = JSON.parse(localStorage.getItem('tickets')) || [];
+        let currentTicketIndex = null;
 
         // Tải danh sách phiếu khi mở trang
         renderTicketList();
+
+        // Hiển thị/hide input vấn đề khi chọn "P"
+        document.querySelectorAll('.vehicle-check select').forEach(select => {
+            select.addEventListener('change', (e) => {
+                const input = e.target.nextElementSibling;
+                input.style.display = e.target.value === 'P' ? 'inline-block' : 'none';
+            });
+        });
 
         // Xử lý khi lưu phiếu
         form.addEventListener('submit', (e) => {
@@ -264,13 +412,50 @@
                 technician: formData.get('technician'),
                 plate: formData.get('plate'),
                 payment: formData.getAll('payment'),
-                notes: formData.get('notes')
+                vehicle: {
+                    clutch: { status: formData.get('clutch'), note: formData.get('clutch_note') },
+                    engine: { status: formData.get('engine'), note: formData.get('engine_note') },
+                    horn: { status: formData.get('horn'), note: formData.get('horn_note') },
+                    lean: { status: formData.get('lean'), note: formData.get('lean_note') },
+                    footrest_left: { status: formData.get('footrest_left'), note: formData.get('footrest_left_note') },
+                    transmission: { status: formData.get('transmission'), note: formData.get('transmission_note') },
+                    fuel_injection: { status: formData.get('fuel_injection'), note: formData.get('fuel_injection_note') },
+                    throttle: { status: formData.get('throttle'), note: formData.get('throttle_note') },
+                    exhaust: { status: formData.get('exhaust'), note: formData.get('exhaust_note') },
+                    brake_pedal: { status: formData.get('brake_pedal'), note: formData.get('brake_pedal_note') },
+                    footrest_right: { status: formData.get('footrest_right'), note: formData.get('footrest_right_note') },
+                    tail_light: { status: formData.get('tail_light'), note: formData.get('tail_light_note') },
+                    turn_signal_rear: { status: formData.get('turn_signal_rear'), note: formData.get('turn_signal_rear_note') },
+                    brake_light: { status: formData.get('brake_light'), note: formData.get('brake_light_note') },
+                    brake_rear: { status: formData.get('brake_rear'), note: formData.get('brake_rear_note') },
+                    brake_fluid: { status: formData.get('brake_fluid'), note: formData.get('brake_fluid_note') },
+                    rear_shock: { status: formData.get('rear_shock'), note: formData.get('rear_shock_note') },
+                    rear_wheel: { status: formData.get('rear_wheel'), note: formData.get('rear_wheel_note') },
+                    handlebar: { status: formData.get('handlebar'), note: formData.get('handlebar_note') },
+                    fuel_tank: { status: formData.get('fuel_tank'), note: formData.get('fuel_tank_note') },
+                    brake_lever: { status: formData.get('brake_lever'), note: formData.get('brake_lever_note') },
+                    mudguard: { status: formData.get('mudguard'), note: formData.get('mudguard_note') },
+                    seat: { status: formData.get('seat'), note: formData.get('seat_note') },
+                    headlight: { status: formData.get('headlight'), note: formData.get('headlight_note') },
+                    turn_signal_front: { status: formData.get('turn_signal_front'), note: formData.get('turn_signal_front_note') },
+                    front_wheel: { status: formData.get('front_wheel'), note: formData.get('front_wheel_note') },
+                    mirror: { status: formData.get('mirror'), note: formData.get('mirror_note') },
+                    front_shock: { status: formData.get('front_shock'), note: formData.get('front_shock_note') },
+                    grip: { status: formData.get('grip'), note: formData.get('grip_note') }
+                },
+                status: 'received'
             };
 
-            tickets.push(ticket);
+            if (currentTicketIndex !== null) {
+                tickets[currentTicketIndex] = ticket; // Cập nhật phiếu
+                currentTicketIndex = null;
+            } else {
+                tickets.push(ticket); // Thêm phiếu mới
+            }
             localStorage.setItem('tickets', JSON.stringify(tickets));
             renderTicketList();
             form.reset();
+            document.querySelectorAll('.vehicle-check input[type="text"]').forEach(input => input.style.display = 'none');
         });
 
         // Hiển thị danh sách phiếu
@@ -279,11 +464,13 @@
             tickets.forEach((ticket, index) => {
                 const ticketItem = document.createElement('div');
                 ticketItem.classList.add('ticket-item');
+                if (ticket.status === 'received') ticketItem.classList.add('received');
                 ticketItem.innerHTML = `
                     <span>Phiếu #${index + 1}</span>
                     <span>Ngày: ${ticket.date || 'Chưa ghi'}</span>
                     <span>Khách hàng: ${ticket.customer || 'Chưa ghi'}</span>
                     <span>VIN#: ${ticket.vin}</span>
+                    ${ticket.status === 'received' ? '<span>Trạng thái: Đã tiếp nhận</span>' : ''}
                 `;
                 ticketItem.addEventListener('click', () => showPopup(ticket, index));
                 ticketList.appendChild(ticketItem);
@@ -292,6 +479,11 @@
 
         // Hiển thị pop-up chi tiết
         function showPopup(ticket, index) {
+            currentTicketIndex = index;
+            let vehicleDetails = '';
+            for (const [part, { status, note }] of Object.entries(ticket.vehicle)) {
+                vehicleDetails += `<p${status === 'P' ? ' class="problem"' : ''}>${part.replace(/_/g, ' ').toUpperCase()}: ${status}${status === 'P' && note ? ' - ' + note : ''}</p>`;
+            }
             popupDetails.innerHTML = `
                 <p><strong>Phiếu #${index + 1}</strong></p>
                 <p>Ngày: ${ticket.date || 'Chưa ghi'}</p>
@@ -304,7 +496,9 @@
                 <p>Kỹ thuật viên: ${ticket.technician || 'Chưa ghi'}</p>
                 <p>Biển số#: ${ticket.plate}</p>
                 <p>Hình thức thanh toán: ${ticket.payment.length ? ticket.payment.join(', ') : 'Chưa chọn'}</p>
-                <p>Về xe: ${ticket.notes || 'Chưa ghi'}</p>
+                <p>Trạng thái: ${ticket.status === 'received' ? '<span style="color: #28a745; font-weight: bold;">Đã tiếp nhận</span>' : 'Chưa tiếp nhận'}</p>
+                <p><strong>Về xe:</strong></p>
+                ${vehicleDetails}
             `;
             popup.style.display = 'flex';
         }
@@ -312,6 +506,90 @@
         // Đóng pop-up
         function closePopup() {
             popup.style.display = 'none';
+            currentTicketIndex = null;
+        }
+
+        // Sửa phiếu
+        function editTicket() {
+            const ticket = tickets[currentTicketIndex];
+            form.querySelector('[name="date"]').value = ticket.date;
+            form.querySelector('[name="customer"]').value = ticket.customer;
+            form.querySelector('[name="vin"]').value = ticket.vin;
+            form.querySelector('[name="type"]').value = ticket.type;
+            form.querySelector('[name="year"]').value = ticket.year;
+            form.querySelector('[name="km"]').value = ticket.km;
+            form.querySelector('[name="recall"]').value = ticket.recall;
+            form.querySelector('[name="technician"]').value = ticket.technician;
+            form.querySelector('[name="plate"]').value = ticket.plate;
+            ticket.payment.forEach(value => {
+                form.querySelector(`[name="payment"][value="${value}"]`).checked = true;
+            });
+            for (const [part, { status, note }] of Object.entries(ticket.vehicle)) {
+                const select = form.querySelector(`[name="${part}"]`);
+                select.value = status;
+                const input = form.querySelector(`[name="${part}_note"]`);
+                input.value = note;
+                input.style.display = status === 'P' ? 'inline-block' : 'none';
+            }
+            closePopup();
+        }
+
+        // Xóa phiếu
+        function deleteTicket() {
+            if (confirm('Bạn có chắc muốn xóa phiếu này?')) {
+                tickets.splice(currentTicketIndex, 1);
+                localStorage.setItem('tickets', JSON.stringify(tickets));
+                renderTicketList();
+                closePopup();
+            }
+        }
+
+        // Lưu thành PDF
+        function saveAsPdf() {
+            const ticket = tickets[currentTicketIndex];
+            const doc = new jsPDF();
+            let y = 10;
+
+            // Tiêu đề
+            doc.setFontSize(16);
+            doc.setTextColor(26, 115, 232); // Màu xanh #1a73e8
+            doc.text(`Phiếu Tiếp Nhận #${currentTicketIndex + 1}`, 10, y);
+            y += 10;
+
+            // Thông tin cơ bản
+            doc.setFontSize(12);
+            doc.setTextColor(68, 68, 68); // Màu xám #444
+            doc.text(`Ngày: ${ticket.date || 'Chưa ghi'}`, 10, y); y += 7;
+            doc.text(`Khách hàng: ${ticket.customer || 'Chưa ghi'}`, 10, y); y += 7;
+            doc.text(`VIN#: ${ticket.vin}`, 10, y); y += 7;
+            doc.text(`Loại: ${ticket.type || 'Chưa ghi'}`, 10, y); y += 7;
+            doc.text(`Năm: ${ticket.year || 'Chưa ghi'}`, 10, y); y += 7;
+            doc.text(`Số km: ${ticket.km || 'Chưa ghi'}`, 10, y); y += 7;
+            doc.text(`Triệu hồi/Recall: ${ticket.recall || 'Chưa ghi'}`, 10, y); y += 7;
+            doc.text(`Kỹ thuật viên: ${ticket.technician || 'Chưa ghi'}`, 10, y); y += 7;
+            doc.text(`Biển số#: ${ticket.plate}`, 10, y); y += 7;
+            doc.text(`Hình thức thanh toán: ${ticket.payment.length ? ticket.payment.join(', ') : 'Chưa chọn'}`, 10, y); y += 7;
+            doc.setTextColor(40, 167, 69); // Màu xanh lá #28a745
+            doc.text(`Trạng thái: ${ticket.status === 'received' ? 'Đã tiếp nhận' : 'Chưa tiếp nhận'}`, 10, y); y += 10;
+
+            // Về xe
+            doc.setFontSize(14);
+            doc.setTextColor(26, 115, 232);
+            doc.text('Về xe:', 10, y); y += 7;
+            doc.setFontSize(12);
+            for (const [part, { status, note }] of Object.entries(ticket.vehicle)) {
+                doc.setTextColor(status === 'P' ? [230, 57, 70] : [68, 68, 68]); // Đỏ #e63946 cho "P", xám #444 cho "OK"
+                doc.text(`${part.replace(/_/g, ' ').toUpperCase()}: ${status}${status === 'P' && note ? ' - ' + note : ''}`, 10, y);
+                y += 7;
+                if (y > 270) { // Chuyển sang trang mới nếu hết chỗ
+                    doc.addPage();
+                    y = 10;
+                }
+            }
+
+            // Lưu file
+            doc.save(`Phieu_Tiep_Nhan_${currentTicketIndex + 1}.pdf`);
+            closePopup();
         }
 
         // Đóng pop-up khi nhấn ngoài
