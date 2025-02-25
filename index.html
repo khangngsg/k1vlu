@@ -3,621 +3,321 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ thống Nhắn tin Nhóm</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Hệ thống quản lý đơn phiếu tiếp nhận xe</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Arial, sans-serif;
-        }
         body {
-            background: #0f0f0f;
-            color: #e0e0e0;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 10px;
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
         }
         .container {
-            width: 100%;
-            max-width: 1000px;
             display: flex;
-            flex-direction: column;
-            gap: 10px;
-            height: calc(100vh - 20px); /* Chiếm toàn bộ chiều cao trừ padding */
-        }
-        .sidebar {
-            background: #1a1a1a;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-        .chat-area {
-            background: #1a1a1a;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            position: relative;
-            overflow: hidden; /* Ngăn input-area tràn ra ngoài */
-        }
-        .login-form {
-            background: #1a1a1a;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-            width: 100%;
-            max-width: 400px;
+            gap: 20px;
+            max-width: 1200px;
             margin: 0 auto;
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
         }
-        .login-form::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(0,212,255,0.1) 0%, rgba(0,0,0,0) 70%);
-            animation: glow 4s infinite;
-            z-index: 0;
+        .column {
+            flex: 1;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        .login-form h2 {
-            color: #00d4ff;
-            margin-bottom: 20px;
-            font-size: 1.5em;
-            text-align: center;
-            position: relative;
-            z-index: 1;
+        .column h2 {
+            margin-top: 0;
+            color: #333;
+            font-size: 20px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
         }
-        .login-form input {
-            background: #2a2a2a;
-            color: #e0e0e0;
-            border: 1px solid #3a3a3a;
-            padding: 12px;
-            border-radius: 8px;
-            width: 100%;
+        .form-group {
             margin-bottom: 15px;
-            transition: border-color 0.3s, box-shadow 0.3s;
-            position: relative;
-            z-index: 1;
         }
-        .login-form input:focus {
-            border-color: #00d4ff;
-            box-shadow: 0 0 5px rgba(0,212,255,0.5);
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus, .form-group textarea:focus {
+            border-color: #007bff;
             outline: none;
         }
-        .login-form button {
-            background: #00d4ff;
-            color: #1a1a1a;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            width: 100%;
-            cursor: pointer;
-            font-size: 1em;
-            transition: background 0.3s, transform 0.3s;
-            position: relative;
-            z-index: 1;
+        .form-group input[required] + label::after {
+            content: " *";
+            color: red;
         }
-        .login-form button:hover {
-            background: #00aaff;
-            transform: translateY(-2px);
-        }
-        .login-success {
-            animation: fadeOut 0.5s ease-in-out forwards;
-        }
-        .login-fail {
-            animation: shake 0.5s ease-in-out;
-        }
-        .login-form p {
-            color: #ff5555;
-            text-align: center;
-            margin-top: 10px;
-            font-size: 0.9em;
-            position: relative;
-            z-index: 1;
-        }
-        h2 {
-            color: #00d4ff;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-            text-align: center;
-        }
-        .user-list {
-            list-style: none;
-            max-height: 200px;
-            overflow-y: auto;
+        .checkbox-group {
             display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
+            gap: 15px;
+            margin-top: 5px;
         }
-        .user-list li {
-            padding: 8px 12px;
-            border-radius: 20px;
-            background: #2a2a2a;
+        .buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
             cursor: pointer;
-            transition: background 0.3s;
-            font-size: 0.9em;
+            transition: background-color 0.3s;
         }
-        .user-list li:hover {
-            background: #3a3a3a;
+        .buttons .save-btn {
+            background-color: #007bff;
+            color: #fff;
         }
-        .user-list li.active {
-            background: #00d4ff;
-            color: #1a1a1a;
+        .buttons .save-btn:hover {
+            background-color: #0056b3;
         }
-        .messages {
-            flex: 1;
+        .buttons .clear-btn {
+            background-color: #dc3545;
+            color: #fff;
+        }
+        .buttons .clear-btn:hover {
+            background-color: #b02a37;
+        }
+        .ticket-list {
+            max-height: 500px;
             overflow-y: auto;
+        }
+        .ticket-item {
             padding: 10px;
-            background: #1a1a1a;
-            border-radius: 8px;
-            min-height: 200px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.3s;
         }
-        .message {
-            margin: 8px 0;
-            padding: 10px 15px;
-            border-radius: 12px;
-            max-width: 80%;
-            word-wrap: break-word;
-            font-size: 0.9em;
-            background: #2a2a2a;
-            color: #e0e0e0;
+        .ticket-item:hover {
+            background-color: #f8f9fa;
         }
-        .message.sent {
-            background: #00d4ff;
-            color: #1a1a1a;
-            margin-left: auto;
+        .ticket-item span {
+            display: block;
+            font-size: 14px;
+            color: #666;
         }
-        .message.received {
-            background: #2a2a2a;
-            color: #e0e0e0;
-            margin-right: auto;
-        }
-        .message-time {
-            font-size: 0.7em;
-            opacity: 0.7;
-            margin-top: 3px;
-        }
-        .input-area {
-            position: sticky;
-            bottom: 0;
+
+        /* Pop-up CSS */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 0;
             left: 0;
-            right: 0;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            background: #2a2a2a;
-            padding: 10px;
-            border-radius: 25px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            z-index: 2; /* Đảm bảo input-area luôn nằm trên messages */
-        }
-        .file-preview {
-            position: absolute;
-            bottom: 60px;
-            left: 15px;
-            right: 15px;
-            background: #3a3a3a;
-            color: #e0e0e0;
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-size: 0.9em;
-            text-align: center;
-            display: none;
-            z-index: 3; /* Cao hơn input-area để không bị che */
-            animation: slideUp 0.3s ease-in-out;
-        }
-        textarea {
-            padding: 10px;
-            border: none;
-            border-radius: 20px;
-            flex: 1;
-            resize: none;
-            font-size: 0.9em;
-            background: transparent;
-            color: #e0e0e0;
-            min-height: 20px;
-            max-height: 100px;
-            overflow-y: auto;
-        }
-        textarea:focus {
-            outline: none;
-        }
-        .input-area button {
-            padding: 8px;
-            background: transparent;
-            color: #00d4ff;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1.2em;
-            transition: color 0.3s;
-        }
-        .input-area button:hover {
-            color: #00aaff;
-        }
-        .user-info {
-            padding: 8px;
-            background: #2a2a2a;
-            border-radius: 6px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            font-size: 0.9em;
-        }
-        .notification {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background: #00d4ff;
-            color: #1a1a1a;
-            padding: 8px 15px;
-            border-radius: 6px;
-            display: none;
-            z-index: 1000;
-            font-size: 0.9em;
-        }
-        #cameraModal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #1a1a1a;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            z-index: 1000;
-            width: 90%;
-            max-width: 400px;
-        }
-        #cameraModal video, #cameraModal canvas {
             width: 100%;
-            border-radius: 6px;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
         }
-        @media (min-width: 768px) {
-            .container {
-                flex-direction: row;
-            }
-            .sidebar {
-                width: 250px;
-                min-width: 200px;
-            }
-            .user-list {
-                flex-direction: column;
-                flex-wrap: nowrap;
-            }
-            .messages {
-                min-height: 400px;
-            }
+        .popup-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.3s ease-in-out;
         }
-        @keyframes fadeOut {
-            0% { opacity: 1; transform: scale(1); }
-            100% { opacity: 0; transform: scale(0.95); }
+        .popup-content h3 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
         }
-        @keyframes shake {
-            0% { transform: translateX(0); }
-            20% { transform: translateX(-5px); }
-            40% { transform: translateX(5px); }
-            60% { transform: translateX(-5px); }
-            80% { transform: translateX(5px); }
-            100% { transform: translateX(0); }
+        .popup-content p {
+            margin: 10px 0;
+            font-size: 14px;
+            color: #555;
         }
-        @keyframes glow {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .popup-content .close-btn {
+            float: right;
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
         }
-        @keyframes slideUp {
-            0% { opacity: 0; transform: translateY(10px); }
-            100% { opacity: 1; transform: translateY(0); }
+        .popup-content .close-btn:hover {
+            background: #b02a37;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
-    <div class="login-form" id="loginForm">
-        <h2>Đăng nhập Hệ thống</h2>
-        <input type="text" id="username" placeholder="Tên đăng nhập / Mã nhân viên"><br>
-        <input type="password" id="pin" placeholder="Mã PIN (nếu là admin)"><br>
-        <button onclick="login()">Đăng nhập</button>
-        <p id="error"></p>
+    <div class="container">
+        <!-- Cột ghi phiếu tiếp nhận -->
+        <div class="column">
+            <h2>Ghi phiếu tiếp nhận</h2>
+            <form id="ticketForm">
+                <div class="form-group">
+                    <label>Ngày</label>
+                    <input type="date" name="date">
+                </div>
+                <div class="form-group">
+                    <label>Khách hàng</label>
+                    <input type="text" name="customer">
+                </div>
+                <div class="form-group">
+                    <label>VIN#</label>
+                    <input type="text" name="vin" required>
+                </div>
+                <div class="form-group">
+                    <label>Loại</label>
+                    <input type="text" name="type">
+                </div>
+                <div class="form-group">
+                    <label>Năm</label>
+                    <input type="number" name="year">
+                </div>
+                <div class="form-group">
+                    <label>Số km</label>
+                    <input type="number" name="km">
+                </div>
+                <div class="form-group">
+                    <label>Triệu hồi/Recall</label>
+                    <input type="text" name="recall">
+                </div>
+                <div class="form-group">
+                    <label>Kỹ thuật viên</label>
+                    <input type="text" name="technician">
+                </div>
+                <div class="form-group">
+                    <label>Biển số#</label>
+                    <input type="text" name="plate" required>
+                </div>
+                <div class="form-group">
+                    <label>Hình thức thanh toán</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="payment" value="Nội bộ"> Nội bộ</label>
+                        <label><input type="checkbox" name="payment" value="Bảo hành"> Bảo hành</label>
+                        <label><input type="checkbox" name="payment" value="KH thanh toán"> KH thanh toán</label>
+                        <label><input type="checkbox" name="payment" value="Test ride"> Test ride</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Về xe</label>
+                    <textarea name="notes" rows="3" placeholder="Ghi chú về tình trạng xe hoặc yêu cầu"></textarea>
+                </div>
+                <div class="buttons">
+                    <button type="submit" class="save-btn">Lưu phiếu</button>
+                    <button type="reset" class="clear-btn">Xóa</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Cột danh sách phiếu đã lưu -->
+        <div class="column">
+            <h2>Danh sách phiếu đã lưu</h2>
+            <div class="ticket-list" id="ticketList">
+                <!-- Phiếu sẽ được thêm bằng JavaScript -->
+            </div>
+        </div>
     </div>
 
-    <div class="container" id="chatContainer" style="display: none;">
-        <div class="sidebar">
-            <h2>Danh sách</h2>
-            <ul class="user-list" id="userList"></ul>
-        </div>
-        <div class="chat-area">
-            <div class="user-info">
-                <span id="userInfo"></span>
-                <button onclick="logout()"><i class="fas fa-sign-out-alt"></i></button>
-            </div>
-            <div class="messages" id="messages"></div>
-            <div class="file-preview" id="filePreview"></div>
-            <div class="input-area">
-                <textarea id="messageInput" placeholder="Nhập tin nhắn..." rows="1" onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); }"></textarea>
-                <input type="file" id="fileInput" style="display: none;" onchange="showFilePreview()">
-                <button onclick="document.getElementById('fileInput').click();"><i class="fas fa-paperclip"></i></button>
-                <button onclick="openCamera()"><i class="fas fa-camera"></i></button>
-                <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
-            </div>
-        </div>
-    </div>
-    <div class="notification" id="notification">Tin nhắn mới!</div>
-    <div id="cameraModal">
-        <video id="video" autoplay></video>
-        <canvas id="canvas" style="display: none;"></canvas>
-        <div style="margin-top: 10px; text-align: center;">
-            <button onclick="captureImage()" style="background: #00d4ff; color: #1a1a1a;"><i class="fas fa-camera"></i> Chụp</button>
-            <button onclick="closeCamera()" style="background: #ff5555;"><i class="fas fa-times"></i> Đóng</button>
+    <!-- Pop-up chi tiết -->
+    <div class="popup" id="ticketPopup">
+        <div class="popup-content">
+            <button class="close-btn" onclick="closePopup()">Đóng</button>
+            <h3>Chi tiết phiếu</h3>
+            <div id="popupDetails"></div>
         </div>
     </div>
 
     <script>
-        let currentUser = null;
-        const ADMIN_USERNAME = 'admin';
-        const ADMIN_PIN = '132004';
-        let lastMessageCount = {};
-        const GROUP_CHAT = 'group';
-        let currentChat = GROUP_CHAT;
-        let stream = null;
+        const form = document.getElementById('ticketForm');
+        const ticketList = document.getElementById('ticketList');
+        const popup = document.getElementById('ticketPopup');
+        const popupDetails = document.getElementById('popupDetails');
+        let tickets = JSON.parse(localStorage.getItem('tickets')) || [];
 
-        window.onload = function() {
-            const savedUser = localStorage.getItem('currentUser');
-            if (savedUser) {
-                currentUser = savedUser;
-                document.getElementById('loginForm').style.display = 'none';
-                document.getElementById('chatContainer').style.display = 'flex';
-                document.getElementById('userInfo').textContent = `Đăng nhập: ${currentUser}`;
-                loadUsers();
-                loadMessages();
-            }
-        };
+        // Tải danh sách phiếu khi mở trang
+        renderTicketList();
 
-        function login() {
-            const username = document.getElementById('username').value.trim();
-            const pin = document.getElementById('pin').value;
-            const error = document.getElementById('error');
-            const loginForm = document.getElementById('loginForm');
+        // Xử lý khi lưu phiếu
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const ticket = {
+                date: formData.get('date'),
+                customer: formData.get('customer'),
+                vin: formData.get('vin'),
+                type: formData.get('type'),
+                year: formData.get('year'),
+                km: formData.get('km'),
+                recall: formData.get('recall'),
+                technician: formData.get('technician'),
+                plate: formData.get('plate'),
+                payment: formData.getAll('payment'),
+                notes: formData.get('notes')
+            };
 
-            if (!username) {
-                error.textContent = 'Vui lòng nhập tên đăng nhập!';
-                loginForm.classList.remove('login-success');
-                loginForm.classList.add('login-fail');
-                setTimeout(() => loginForm.classList.remove('login-fail'), 500);
-                return;
-            }
+            tickets.push(ticket);
+            localStorage.setItem('tickets', JSON.stringify(tickets));
+            renderTicketList();
+            form.reset();
+        });
 
-            if (username === ADMIN_USERNAME && pin !== ADMIN_PIN) {
-                error.textContent = 'Mã PIN không đúng!';
-                loginForm.classList.remove('login-success');
-                loginForm.classList.add('login-fail');
-                setTimeout(() => loginForm.classList.remove('login-fail'), 500);
-                return;
-            }
-
-            currentUser = username;
-            localStorage.setItem('currentUser', currentUser);
-            loginForm.classList.remove('login-fail');
-            loginForm.classList.add('login-success');
-            setTimeout(() => {
-                document.getElementById('loginForm').style.display = 'none';
-                document.getElementById('chatContainer').style.display = 'flex';
-                document.getElementById('userInfo').textContent = `Đăng nhập: ${currentUser}`;
-                loadUsers();
-                loadMessages();
-            }, 500);
-        }
-
-        function logout() {
-            currentUser = null;
-            localStorage.removeItem('currentUser');
-            document.getElementById('chatContainer').style.display = 'none';
-            document.getElementById('loginForm').style.display = 'block';
-            document.getElementById('username').value = '';
-            document.getElementById('pin').value = '';
-            document.getElementById('error').textContent = '';
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-                stream = null;
-            }
-        }
-
-        function loadUsers() {
-            const userList = document.getElementById('userList');
-            let messages = JSON.parse(localStorage.getItem('messages') || '{}');
-            userList.innerHTML = '';
-
-            const groupItem = document.createElement('li');
-            groupItem.textContent = 'Nhóm Tổng';
-            groupItem.onclick = () => { currentChat = GROUP_CHAT; loadMessages(); };
-            groupItem.classList.add(currentChat === GROUP_CHAT ? 'active' : '');
-            userList.appendChild(groupItem);
-
-            // Luôn hiển thị Admin cho mọi user (trừ Admin chính nó)
-            if (currentUser !== ADMIN_USERNAME) {
-                const adminItem = document.createElement('li');
-                adminItem.textContent = ADMIN_USERNAME;
-                adminItem.onclick = () => { currentChat = ADMIN_USERNAME; loadMessages(); };
-                adminItem.classList.add(currentChat === ADMIN_USERNAME ? 'active' : '');
-                userList.appendChild(adminItem);
-            }
-
-            // Admin thấy tất cả user
-            if (currentUser === ADMIN_USERNAME) {
-                for (let user in messages) {
-                    if (user !== GROUP_CHAT && user !== ADMIN_USERNAME) {
-                        const li = document.createElement('li');
-                        li.textContent = user;
-                        li.onclick = () => { currentChat = user; loadMessages(); };
-                        li.classList.add(currentChat === user ? 'active' : '');
-                        userList.appendChild(li);
-                    }
-                }
-            }
-        }
-
-        function loadMessages() {
-            const messagesDiv = document.getElementById('messages');
-            let messages = JSON.parse(localStorage.getItem('messages') || '{}');
-            messagesDiv.innerHTML = '';
-
-            let chatMessages = messages[currentChat] || [];
-            if (currentChat !== GROUP_CHAT) {
-                chatMessages = chatMessages.filter(msg => 
-                    (msg.from === currentUser && msg.to === currentChat) || 
-                    (msg.from === currentChat && msg.to === currentUser)
-                );
-            }
-
-            const currentCount = chatMessages.length;
-            if (!lastMessageCount[currentChat]) lastMessageCount[currentChat] = 0;
-            if (currentCount > lastMessageCount[currentChat] && chatMessages[chatMessages.length - 1]?.from !== currentUser) {
-                showNotification();
-                lastMessageCount[currentChat] = currentCount;
-            }
-
-            chatMessages.forEach(msg => {
-                displayMessage(msg, msg.from === currentUser ? 'sent' : 'received');
+        // Hiển thị danh sách phiếu
+        function renderTicketList() {
+            ticketList.innerHTML = '';
+            tickets.forEach((ticket, index) => {
+                const ticketItem = document.createElement('div');
+                ticketItem.classList.add('ticket-item');
+                ticketItem.innerHTML = `
+                    <span>Phiếu #${index + 1}</span>
+                    <span>Ngày: ${ticket.date || 'Chưa ghi'}</span>
+                    <span>Khách hàng: ${ticket.customer || 'Chưa ghi'}</span>
+                    <span>VIN#: ${ticket.vin}</span>
+                `;
+                ticketItem.addEventListener('click', () => showPopup(ticket, index));
+                ticketList.appendChild(ticketItem);
             });
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
-        function showNotification() {
-            const notification = document.getElementById('notification');
-            notification.style.display = 'block';
-            setTimeout(() => notification.style.display = 'none', 3000);
+        // Hiển thị pop-up chi tiết
+        function showPopup(ticket, index) {
+            popupDetails.innerHTML = `
+                <p><strong>Phiếu #${index + 1}</strong></p>
+                <p>Ngày: ${ticket.date || 'Chưa ghi'}</p>
+                <p>Khách hàng: ${ticket.customer || 'Chưa ghi'}</p>
+                <p>VIN#: ${ticket.vin}</p>
+                <p>Loại: ${ticket.type || 'Chưa ghi'}</p>
+                <p>Năm: ${ticket.year || 'Chưa ghi'}</p>
+                <p>Số km: ${ticket.km || 'Chưa ghi'}</p>
+                <p>Triệu hồi/Recall: ${ticket.recall || 'Chưa ghi'}</p>
+                <p>Kỹ thuật viên: ${ticket.technician || 'Chưa ghi'}</p>
+                <p>Biển số#: ${ticket.plate}</p>
+                <p>Hình thức thanh toán: ${ticket.payment.length ? ticket.payment.join(', ') : 'Chưa chọn'}</p>
+                <p>Về xe: ${ticket.notes || 'Chưa ghi'}</p>
+            `;
+            popup.style.display = 'flex';
         }
 
-        function showFilePreview() {
-            const fileInput = document.getElementById('fileInput');
-            const filePreview = document.getElementById('filePreview');
-            if (fileInput.files.length > 0) {
-                filePreview.textContent = `Đã chọn: ${fileInput.files[0].name}`;
-                filePreview.style.display = 'block';
-                setTimeout(() => filePreview.style.display = 'none', 3000);
-            }
+        // Đóng pop-up
+        function closePopup() {
+            popup.style.display = 'none';
         }
 
-        function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const fileInput = document.getElementById('fileInput');
-            const text = input.value.trim();
-            const file = fileInput.files[0];
-
-            if (!text && !file) return;
-
-            const timestamp = new Date().toLocaleString();
-            let message = { 
-                text, 
-                timestamp, 
-                from: currentUser, 
-                to: currentChat === GROUP_CHAT ? null : currentChat 
-            };
-
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    message.file = { name: file.name, data: e.target.result, type: file.type };
-                    saveMessage(currentChat, message);
-                };
-                reader.readAsDataURL(file);
-            } else {
-                saveMessage(currentChat, message);
-            }
-
-            input.value = '';
-            fileInput.value = '';
-            document.getElementById('filePreview').style.display = 'none';
-        }
-
-        function saveMessage(target, message) {
-            let messages = JSON.parse(localStorage.getItem('messages') || '{}');
-            if (!messages[target]) messages[target] = [];
-            messages[target].push(message);
-            localStorage.setItem('messages', JSON.stringify(messages));
-            loadMessages();
-            loadUsers();
-        }
-
-        function displayMessage(msg, type) {
-            const messagesDiv = document.getElementById('messages');
-            const div = document.createElement('div');
-            div.className = `message ${type}`;
-            
-            let content = `<strong>${msg.from}</strong>: ${msg.text || ''}`;
-            if (msg.file) {
-                if (msg.file.type.startsWith('image/')) {
-                    content += `<br><img src="${msg.file.data}" style="max-width: 100%; border-radius: 4px;">`;
-                } else {
-                    content += `<br>File: <a href="${msg.file.data}" download="${msg.file.name}" style="color: ${type === 'sent' ? '#1a1a1a' : '#00d4ff'}">${msg.file.name}</a>`;
-                }
-            }
-            content += `<div class="message-time">${msg.timestamp}</div>`;
-            
-            div.innerHTML = content;
-            messagesDiv.appendChild(div);
-        }
-
-        function openCamera() {
-            const modal = document.getElementById('cameraModal');
-            const video = document.getElementById('video');
-            modal.style.display = 'block';
-
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(s => {
-                    stream = s;
-                    video.srcObject = stream;
-                })
-                .catch(err => {
-                    alert('Không thể truy cập camera: ' + err.message);
-                    closeCamera();
-                });
-        }
-
-        function captureImage() {
-            const video = document.getElementById('video');
-            const canvas = document.getElementById('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0);
-            const dataUrl = canvas.toDataURL('image/png');
-            const timestamp = new Date().toLocaleString();
-            const message = {
-                timestamp,
-                from: currentUser,
-                to: currentChat === GROUP_CHAT ? null : currentChat,
-                file: { name: 'photo.png', data: dataUrl, type: 'image/png' }
-            };
-            document.getElementById('filePreview').textContent = 'Đã chọn: photo.png';
-            document.getElementById('filePreview').style.display = 'block';
-            setTimeout(() => document.getElementById('filePreview').style.display = 'none', 3000);
-            saveMessage(currentChat, message);
-            closeCamera();
-        }
-
-        function closeCamera() {
-            const modal = document.getElementById('cameraModal');
-            const video = document.getElementById('video');
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-                stream = null;
-            }
-            video.srcObject = null;
-            modal.style.display = 'none';
-        }
-
-        setInterval(() => loadMessages(), 1000);
+        // Đóng pop-up khi nhấn ngoài
+        popup.addEventListener('click', (e) => {
+            if (e.target === popup) closePopup();
+        });
     </script>
 </body>
 </html>
