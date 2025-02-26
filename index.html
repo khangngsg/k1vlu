@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ thống quản lý đơn phiếu tiếp nhận xe</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
             font-family: 'Helvetica Neue', 'Arial', sans-serif;
@@ -15,7 +16,6 @@
             overflow-x: auto;
         }
 
-        /* Trang mật khẩu */
         #loginPage {
             background: #FFFFFF;
             border: 1px solid #003087;
@@ -63,7 +63,6 @@
             color: #000000;
         }
 
-        /* Trang chính */
         #mainPage {
             display: none;
             max-width: 1200px;
@@ -100,6 +99,10 @@
             box-sizing: border-box;
             background: #F5F5F5;
             transition: border-color 0.3s ease;
+        }
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
         }
         .form-group input:focus, .form-group textarea:focus {
             border-color: #003087;
@@ -151,7 +154,6 @@
             color: #000000;
         }
 
-        /* Phần "Về xe" */
         .vehicle-section {
             margin-bottom: 15px;
         }
@@ -195,7 +197,6 @@
             background: #FFFFFF;
         }
 
-        /* Danh sách phiếu đã lưu */
         .ticket-sidebar {
             position: fixed;
             bottom: 20px;
@@ -251,7 +252,6 @@
             color: #333333;
         }
 
-        /* Nút mở danh sách */
         .toggle-tickets-btn {
             position: fixed;
             bottom: 20px;
@@ -270,7 +270,6 @@
             color: #000000;
         }
 
-        /* Pop-up */
         .popup {
             display: none;
             position: fixed;
@@ -307,6 +306,7 @@
         }
         .popup-content p.error {
             font-weight: bold;
+            color: #FF0000;
         }
         .popup-buttons {
             display: flex;
@@ -343,7 +343,40 @@
             color: #000000;
         }
 
-        /* Thông báo tự tạo */
+        .image-popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 2500;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .image-popup.active {
+            opacity: 1;
+        }
+        .image-content {
+            position: relative;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+            max-width: 90%;
+            max-height: 90vh;
+        }
+        .image-popup.active .image-content {
+            transform: scale(1);
+        }
+        .image-content img {
+            max-width: 100%;
+            max-height: 80vh;
+            border: 2px solid #FFFFFF;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
         .custom-alert {
             display: none;
             position: fixed;
@@ -389,7 +422,6 @@
             color: #000000;
         }
 
-        /* Loading overlay */
         .loading-overlay {
             display: none;
             position: fixed;
@@ -415,7 +447,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .form-column {
                 padding: 15px;
@@ -433,14 +464,12 @@
     </style>
 </head>
 <body>
-    <!-- Trang mật khẩu -->
     <div id="loginPage">
         <h2>Đăng nhập</h2>
         <input type="password" id="passwordInput" placeholder="Nhập mật khẩu">
         <button id="loginBtn">Đăng nhập</button>
     </div>
 
-    <!-- Trang chính -->
     <div id="mainPage" class="container">
         <div class="form-column">
             <h2>Ghi phiếu tiếp nhận</h2>
@@ -490,70 +519,79 @@
                         <label><input type="checkbox" name="payment" value="Test ride"> Test ride</label>
                     </div>
                 </div>
+                <div class="form-group">
+                    <label>Ảnh xe (tối đa 5 ảnh)</label>
+                    <input type="file" name="vehicle_images" accept="image/*" multiple>
+                    <div id="imagePreview" style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;"></div>
+                </div>
+                <div class="form-group">
+                    <label>Ghi nội dung cụ thể</label>
+                    <textarea name="notes" placeholder="Ghi chú thêm nếu có"></textarea>
+                </div>
                 <div class="vehicle-section">
                     <h3>Phần Left</h3>
                     <div class="vehicle-grid">
-                        <div class="vehicle-check"><label>Côn</label><select name="clutch"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="clutch_note"></div>
-                        <div class="vehicle-check"><label>Động cơ</label><select name="engine"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="engine_note"></div>
-                        <div class="vehicle-check"><label>Còi</label><select name="horn"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="horn_note"></div>
-                        <div class="vehicle-check"><label>Chống nghiêng</label><select name="lean"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="lean_note"></div>
-                        <div class="vehicle-check"><label>Gác chân</label><select name="footrest_left"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="footrest_left_note"></div>
+                        <div class="vehicle-check"><label>Côn</label><select name="clutch"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="clutch_note"></div>
+                        <div class="vehicle-check"><label>Động cơ</label><select name="engine"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="engine_note"></div>
+                        <div class="vehicle-check"><label>Còi</label><select name="horn"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="horn_note"></div>
+                        <div class="vehicle-check"><label>Chống nghiêng</label><select name="lean"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="lean_note"></div>
+                        <div class="vehicle-check"><label>Gác chân</label><select name="footrest_left"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="footrest_left_note"></div>
                     </div>
                 </div>
                 <div class="vehicle-section">
                     <h3>Phần Right</h3>
                     <div class="vehicle-grid">
-                        <div class="vehicle-check"><label>Truyền động</label><select name="transmission"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="transmission_note"></div>
-                        <div class="vehicle-check"><label>Phun xăng</label><select name="fuel_injection"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="fuel_injection_note"></div>
-                        <div class="vehicle-check"><label>Tay ga</label><select name="throttle"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="throttle_note"></div>
-                        <div class="vehicle-check"><label>Ống xả</label><select name="exhaust"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="exhaust_note"></div>
-                        <div class="vehicle-check"><label>Cần đạp phanh</label><select name="brake_pedal"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="brake_pedal_note"></div>
-                        <div class="vehicle-check"><label>Gác chân</label><select name="footrest_right"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="footrest_right_note"></div>
+                        <div class="vehicle-check"><label>Truyền động</label><select name="transmission"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="transmission_note"></div>
+                        <div class="vehicle-check"><label>Phun xăng</label><select name="fuel_injection"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="fuel_injection_note"></div>
+                        <div class="vehicle-check"><label>Tay ga</label><select name="throttle"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="throttle_note"></div>
+                        <div class="vehicle-check"><label>Ống xả</label><select name="exhaust"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="exhaust_note"></div>
+                        <div class="vehicle-check"><label>Cần đạp phanh</label><select name="brake_pedal"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="brake_pedal_note"></div>
+                        <div class="vehicle-check"><label>Gác chân</label><select name="footrest_right"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="footrest_right_note"></div>
                     </div>
                 </div>
                 <div class="vehicle-section">
                     <h3>Phần Rear</h3>
                     <div class="vehicle-grid">
-                        <div class="vehicle-check"><label>Đèn đuôi</label><select name="tail_light"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="tail_light_note"></div>
-                        <div class="vehicle-check"><label>Xi nhan</label><select name="turn_signal_rear"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="turn_signal_rear_note"></div>
-                        <div class="vehicle-check"><label>Đèn phanh</label><select name="brake_light"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="brake_light_note"></div>
-                        <div class="vehicle-check"><label>Phanh</label><select name="brake_rear"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="brake_rear_note"></div>
-                        <div class="vehicle-check"><label>Hộp dầu phanh</label><select name="brake_fluid"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="brake_fluid_note"></div>
-                        <div class="vehicle-check"><label>Giảm xóc sau</label><select name="rear_shock"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="rear_shock_note"></div>
-                        <div class="vehicle-check"><label>Bánh sau</label><select name="rear_wheel"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="rear_wheel_note"></div>
+                        <div class="vehicle-check"><label>Đèn đuôi</label><select name="tail_light"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="tail_light_note"></div>
+                        <div class="vehicle-check"><label>Xi nhan</label><select name="turn_signal_rear"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="turn_signal_rear_note"></div>
+                        <div class="vehicle-check"><label>Đèn phanh</label><select name="brake_light"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="brake_light_note"></div>
+                        <div class="vehicle-check"><label>Phanh</label><select name="brake_rear"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="brake_rear_note"></div>
+                        <div class="vehicle-check"><label>Hộp dầu phanh</label><select name="brake_fluid"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="brake_fluid_note"></div>
+                        <div class="vehicle-check"><label>Giảm xóc sau</label><select name="rear_shock"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="rear_shock_note"></div>
+                        <div class="vehicle-check"><label>Bánh sau</label><select name="rear_wheel"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="rear_wheel_note"></div>
                     </div>
                 </div>
                 <div class="vehicle-section">
                     <h3>Phần Trên</h3>
                     <div class="vehicle-grid">
-                        <div class="vehicle-check"><label>Tay lái</label><select name="handlebar"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="handlebar_note"></div>
-                        <div class="vehicle-check"><label>Bình xăng</label><select name="fuel_tank"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="fuel_tank_note"></div>
-                        <div class="vehicle-check"><label>Tay phanh</label><select name="brake_lever"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="brake_lever_note"></div>
-                        <div class="vehicle-check"><label>Chắn bùn</label><select name="mudguard"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="mudguard_note"></div>
-                        <div class="vehicle-check"><label>Yên</label><select name="seat"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="seat_note"></div>
+                        <div class="vehicle-check"><label>Tay lái</label><select name="handlebar"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="handlebar_note"></div>
+                        <div class="vehicle-check"><label>Bình xăng</label><select name="fuel_tank"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="fuel_tank_note"></div>
+                        <div class="vehicle-check"><label>Tay phanh</label><select name="brake_lever"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="brake_lever_note"></div>
+                        <div class="vehicle-check"><label>Chắn bùn</label><select name="mudguard"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="mudguard_note"></div>
+                        <div class="vehicle-check"><label>Yên</label><select name="seat"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="seat_note"></div>
                     </div>
                 </div>
                 <div class="vehicle-section">
                     <h3>Phần Trước</h3>
                     <div class="vehicle-grid">
-                        <div class="vehicle-check"><label>Đèn pha</label><select name="headlight"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="headlight_note"></div>
-                        <div class="vehicle-check"><label>Xi nhan</label><select name="turn_signal_front"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="turn_signal_front_note"></div>
-                        <div class="vehicle-check"><label>Bánh trước</label><select name="front_wheel"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="front_wheel_note"></div>
-                        <div class="vehicle-check"><label>Gương chiếu hậu</label><select name="mirror"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="mirror_note"></div>
-                        <div class="vehicle-check"><label>Giảm xóc trước</label><select name="front_shock"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="front_shock_note"></div>
-                        <div class="vehicle-check"><label>Tay nắm</label><select name="grip"><option value="OK">OK</option><option value="P">P</option></select><input type="text" name="grip_note"></div>
+                        <div class="vehicle-check"><label>Đèn pha</label><select name="headlight"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="headlight_note"></div>
+                        <div class="vehicle-check"><label>Xi nhan</label><select name="turn_signal_front"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="turn_signal_front_note"></div>
+                        <div class="vehicle-check"><label>Bánh trước</label><select name="front_wheel"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="front_wheel_note"></div>
+                        <div class="vehicle-check"><label>Gương chiếu hậu</label><select name="mirror"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="mirror_note"></div>
+                        <div class="vehicle-check"><label>Giảm xóc trước</label><select name="front_shock"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="front_shock_note"></div>
+                        <div class="vehicle-check"><label>Tay nắm</label><select name="grip"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="grip_note"></div>
                     </div>
                 </div>
                 <div class="buttons">
                     <button type="submit" class="save-btn" id="saveBtn">Lưu phiếu</button>
                     <button type="submit" class="update-btn" id="updateBtn" style="display: none;">Cập nhật phiếu</button>
                     <button type="reset" class="clear-btn">Xóa</button>
+                    <button type="button" class="screenshot-btn" id="screenshotBtn" disabled>Chụp ảnh</button>
                 </div>
             </form>
             <button class="lock-btn" id="lockBtn">Khóa trang</button>
         </div>
 
-        <!-- Danh sách phiếu đã lưu -->
         <div class="ticket-sidebar" id="ticketSidebar">
             <h2>Danh sách phiếu đã lưu</h2>
             <div class="search-bar">
@@ -562,10 +600,8 @@
             <div id="ticketList"></div>
         </div>
 
-        <!-- Nút mở danh sách -->
         <button class="toggle-tickets-btn" id="toggleTicketsBtn">📋</button>
 
-        <!-- Pop-up chi tiết -->
         <div class="popup" id="ticketPopup">
             <div class="popup-content" id="popupContent">
                 <h3>Chi tiết phiếu</h3>
@@ -575,16 +611,21 @@
                     <button class="edit-btn" onclick="editTicket()">Sửa</button>
                     <button class="delete-btn" onclick="deleteTicket()">Xóa</button>
                     <button class="copy-btn" onclick="copyTicket()">Copy</button>
+                    <button class="screenshot-btn" onclick="takeScreenshot()">Chụp ảnh</button>
                 </div>
             </div>
         </div>
 
-        <!-- Loading overlay -->
+        <div class="image-popup" id="imagePopup">
+            <div class="image-content">
+                <img id="popupImage" src="" alt="Ảnh xe">
+            </div>
+        </div>
+
         <div class="loading-overlay" id="loadingOverlay">
             <div class="loading-spinner"></div>
         </div>
 
-        <!-- Thông báo tự tạo -->
         <div class="custom-alert" id="customAlert">
             <h3 id="alertTitle"></h3>
             <p id="alertMessage"></p>
@@ -598,9 +639,11 @@
         const ticketSidebar = document.getElementById('ticketSidebar');
         const toggleTicketsBtn = document.getElementById('toggleTicketsBtn');
         const popup = document.getElementById('ticketPopup');
+        const popupContent = document.getElementById('popupContent');
         const popupDetails = document.getElementById('popupDetails');
         const saveBtn = document.getElementById('saveBtn');
         const updateBtn = document.getElementById('updateBtn');
+        const screenshotBtn = document.getElementById('screenshotBtn');
         const loginPage = document.getElementById('loginPage');
         const mainPage = document.getElementById('mainPage');
         const passwordInput = document.getElementById('passwordInput');
@@ -612,22 +655,24 @@
         const alertTitle = document.getElementById('alertTitle');
         const alertMessage = document.getElementById('alertMessage');
         const alertButtons = document.getElementById('alertButtons');
+        const imagePopup = document.getElementById('imagePopup');
+        const popupImage = document.getElementById('popupImage');
+        const imageInput = form.querySelector('[name="vehicle_images"]');
+        const imagePreview = document.getElementById('imagePreview');
         let tickets = JSON.parse(localStorage.getItem('tickets')) || [];
         let currentTicketIndex = null;
         const correctPassword = '132004';
         let isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        let imageFiles = [];
 
-        // Hiển thị loading
         function showLoading() {
             loadingOverlay.style.display = 'flex';
         }
 
-        // Ẩn loading
         function hideLoading() {
             loadingOverlay.style.display = 'none';
         }
 
-        // Hiển thị thông báo tự tạo
         function showCustomAlert(title, message, buttons = [{ text: 'OK', callback: () => {} }]) {
             alertTitle.textContent = title;
             alertMessage.textContent = message;
@@ -644,7 +689,6 @@
             customAlert.style.display = 'block';
         }
 
-        // Xử lý đăng nhập
         loginBtn.addEventListener('click', () => {
             if (passwordInput.value === correctPassword) {
                 isLoggedIn = true;
@@ -658,16 +702,15 @@
             }
         });
 
-        // Khóa trang
         lockBtn.addEventListener('click', () => {
             isLoggedIn = false;
             localStorage.setItem('isLoggedIn', 'false');
             mainPage.style.display = 'none';
             loginPage.style.display = 'block';
             ticketSidebar.classList.remove('active');
+            screenshotBtn.disabled = true;
         });
 
-        // Kiểm tra trạng thái đăng nhập khi load trang
         if (isLoggedIn) {
             loginPage.style.display = 'none';
             mainPage.style.display = 'block';
@@ -676,7 +719,6 @@
             mainPage.style.display = 'none';
         }
 
-        // Hiện/ẩn danh sách phiếu
         toggleTicketsBtn.addEventListener('click', () => {
             ticketSidebar.classList.toggle('active');
             if (ticketSidebar.classList.contains('active')) {
@@ -689,15 +731,105 @@
             }
         });
 
-        // Hiển thị/hide input vấn đề khi chọn "P"
         document.querySelectorAll('.vehicle-check select').forEach(select => {
             select.addEventListener('change', (e) => {
                 const input = e.target.nextElementSibling;
-                input.style.display = e.target.value === 'P' ? 'inline-block' : 'none';
+                input.style.display = e.target.value === 'Có vấn đề' ? 'inline-block' : 'none';
             });
         });
 
-        // Xử lý khi lưu hoặc cập nhật phiếu
+        imageInput.addEventListener('change', (e) => {
+            imagePreview.innerHTML = '';
+            imageFiles = Array.from(e.target.files).slice(0, 5);
+            renderImagePreview();
+        });
+
+        function renderImagePreview() {
+            imagePreview.innerHTML = '';
+            imageFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const imgContainer = document.createElement('div');
+                    imgContainer.style.position = 'relative';
+                    imgContainer.style.width = '100px';
+                    imgContainer.style.height = '100px';
+                    
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+                    img.style.cursor = 'pointer';
+                    img.addEventListener('click', () => showImagePopup(e.target.result));
+                    
+                    const removeBtn = document.createElement('button');
+                    removeBtn.textContent = 'X';
+                    removeBtn.style.position = 'absolute';
+                    removeBtn.style.top = '0';
+                    removeBtn.style.right = '0';
+                    removeBtn.style.background = '#003087';
+                    removeBtn.style.color = '#FFFFFF';
+                    removeBtn.style.border = 'none';
+                    removeBtn.style.padding = '2px 6px';
+                    removeBtn.style.cursor = 'pointer';
+                    removeBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        imageFiles.splice(index, 1);
+                        renderImagePreview();
+                    });
+                    
+                    imgContainer.appendChild(img);
+                    imgContainer.appendChild(removeBtn);
+                    imagePreview.appendChild(imgContainer);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function showImagePopup(src) {
+            popupImage.src = src;
+            imagePopup.style.display = 'flex';
+            setTimeout(() => imagePopup.classList.add('active'), 10);
+        }
+
+        imagePopup.addEventListener('click', (e) => {
+            if (e.target === imagePopup) {
+                imagePopup.classList.remove('active');
+                setTimeout(() => imagePopup.style.display = 'none', 300);
+            }
+        });
+
+        async function takeScreenshot() {
+            if (!popup.style.display || popup.style.display === 'none') {
+                showCustomAlert('Lỗi', 'Vui lòng mở popup chi tiết trước khi chụp ảnh!');
+                return;
+            }
+
+            showLoading();
+            try {
+                const canvas = await html2canvas(popupContent, {
+                    scale: 2, // Độ phân giải cao
+                    useCORS: true,
+                    backgroundColor: '#FFFFFF',
+                    scrollX: 0,
+                    scrollY: -window.scrollY, // Đảm bảo lấy từ đầu trang
+                    height: popupContent.scrollHeight, // Chụp toàn bộ chiều cao nội dung
+                    windowHeight: popupContent.scrollHeight // Đặt chiều cao canvas bằng nội dung thực tế
+                });
+                const imgData = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.href = imgData;
+                link.download = `${tickets[currentTicketIndex].vin}_${tickets[currentTicketIndex].plate}_Screenshot.png`;
+                link.click();
+                hideLoading();
+                showCustomAlert('Thành công', 'Ảnh đã được chụp và tải về thành công!');
+            } catch (error) {
+                hideLoading();
+                console.error('Lỗi khi chụp ảnh:', error);
+                showCustomAlert('Lỗi', 'Không thể chụp ảnh. Vui lòng thử lại!');
+            }
+        }
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = new FormData(form);
@@ -712,6 +844,14 @@
                 technician: formData.get('technician'),
                 plate: formData.get('plate'),
                 payment: formData.getAll('payment'),
+                images: await Promise.all(imageFiles.map(file => 
+                    new Promise(resolve => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => resolve(e.target.result);
+                        reader.readAsDataURL(file);
+                    })
+                )),
+                notes: formData.get('notes'),
                 vehicle: {
                     clutch: { status: formData.get('clutch'), note: formData.get('clutch_note') },
                     engine: { status: formData.get('engine'), note: formData.get('engine_note') },
@@ -755,8 +895,11 @@
                         currentTicketIndex = null;
                         saveBtn.style.display = 'inline-block';
                         updateBtn.style.display = 'none';
+                        screenshotBtn.disabled = true;
                         localStorage.setItem('tickets', JSON.stringify(tickets));
                         form.reset();
+                        imageFiles = [];
+                        imagePreview.innerHTML = '';
                         document.querySelectorAll('.vehicle-check input[type="text"]').forEach(input => input.style.display = 'none');
                         hideLoading();
                         showCustomAlert('Thành công', 'Phiếu đã được cập nhật thành công!');
@@ -771,6 +914,8 @@
                         tickets.push(ticket);
                         localStorage.setItem('tickets', JSON.stringify(tickets));
                         form.reset();
+                        imageFiles = [];
+                        imagePreview.innerHTML = '';
                         document.querySelectorAll('.vehicle-check input[type="text"]').forEach(input => input.style.display = 'none');
                         hideLoading();
                         showCustomAlert('Thành công', 'Phiếu đã được lưu thành công!');
@@ -781,7 +926,14 @@
             renderTicketList();
         });
 
-        // Hiển thị danh sách phiếu với tìm kiếm
+        screenshotBtn.addEventListener('click', () => {
+            if (!popup.style.display || popup.style.display === 'none') {
+                showCustomAlert('Lỗi', 'Vui lòng mở popup chi tiết trước khi chụp ảnh!');
+            } else {
+                takeScreenshot();
+            }
+        });
+
         function renderTicketList(searchTerm = '') {
             ticketList.innerHTML = '';
             const filteredTickets = tickets.filter(ticket => {
@@ -812,19 +964,24 @@
             });
         }
 
-        // Tìm kiếm phiếu
         searchInput.addEventListener('input', (e) => {
             renderTicketList(e.target.value);
         });
 
-        // Hiển thị pop-up chi tiết
         function showPopup(ticket, index) {
             currentTicketIndex = index;
             let vehicleDetails = '';
             for (const [part, { status, note }] of Object.entries(ticket.vehicle)) {
                 const partName = part.replace(/_/g, ' ').toUpperCase();
-                const isError = status === 'P';
+                const isError = status === 'Có vấn đề';
                 vehicleDetails += `<p ${isError ? 'class="error"' : ''}>${partName}: ${status}${note ? ' - ' + note : ''}</p>`;
+            }
+            let imagesHTML = '';
+            if (ticket.images && ticket.images.length) {
+                imagesHTML = '<p><strong>Ảnh xe:</strong></p>';
+                ticket.images.forEach((src) => {
+                    imagesHTML += `<img src="${src}" style="width: 100px; height: 100px; margin: 5px; cursor: pointer;" onclick="showImagePopup('${src}')">`;
+                });
             }
             const ticketDetails = `
                 <p>Phiếu #${index + 1}</p>
@@ -837,8 +994,10 @@
                 <p>Triệu hồi/Recall: ${ticket.recall || 'Chưa ghi'}</p>
                 <p>Kỹ thuật viên: ${ticket.technician || 'Chưa ghi'}</p>
                 <p>Biển số#: ${ticket.plate}</p>
-                <p>Hình thức thanh toán: ${ticket.payment.length ? ticket.payment.join(', ') : 'Chưa chọn'}</p>
+                <p>Hình thức thanh toán: ${ticket.payment && ticket.payment.length ? ticket.payment.join(', ') : 'Chưa chọn'}</p>
                 <p>Trạng thái: ${ticket.status === 'received' ? 'Đã tiếp nhận' : 'Chưa tiếp nhận'}</p>
+                ${ticket.notes ? `<p><strong>Ghi nội dung cụ thể:</strong> ${ticket.notes}</p>` : ''}
+                ${imagesHTML}
                 <p><strong>Về xe:</strong></p>
                 ${vehicleDetails}
             `;
@@ -846,15 +1005,15 @@
             popupDetails.dataset.text = ticketDetails.replace(/<[^>]+>/g, '');
             popup.style.display = 'flex';
             ticketSidebar.classList.remove('active');
+            screenshotBtn.disabled = false;
         }
 
-        // Đóng pop-up
         function closePopup() {
             popup.style.display = 'none';
             currentTicketIndex = null;
+            screenshotBtn.disabled = true;
         }
 
-        // Sửa phiếu
         function editTicket() {
             if (currentTicketIndex === null) return;
             const ticket = tickets[currentTicketIndex];
@@ -867,9 +1026,17 @@
             form.querySelector('[name="recall"]').value = ticket.recall || '';
             form.querySelector('[name="technician"]').value = ticket.technician || '';
             form.querySelector('[name="plate"]').value = ticket.plate || '';
+            form.querySelector('[name="notes"]').value = ticket.notes || '';
             document.querySelectorAll('[name="payment"]').forEach(checkbox => {
                 checkbox.checked = ticket.payment.includes(checkbox.value);
             });
+            if (ticket.images && ticket.images.length) {
+                imageFiles = ticket.images.map(src => {
+                    const blob = dataURLtoBlob(src);
+                    return new File([blob], `image_${Date.now()}.jpg`, { type: 'image/jpeg' });
+                });
+                renderImagePreview();
+            }
             for (const [part, { status, note }] of Object.entries(ticket.vehicle)) {
                 const select = form.querySelector(`[name="${part}"]`);
                 if (select) {
@@ -877,16 +1044,16 @@
                     const input = form.querySelector(`[name="${part}_note"]`);
                     if (input) {
                         input.value = note || '';
-                        input.style.display = status === 'P' ? 'inline-block' : 'none';
+                        input.style.display = status === 'Có vấn đề' ? 'inline-block' : 'none';
                     }
                 }
             }
             saveBtn.style.display = 'none';
             updateBtn.style.display = 'inline-block';
+            screenshotBtn.disabled = true;
             closePopup();
         }
 
-        // Xóa phiếu
         function deleteTicket() {
             if (currentTicketIndex === null) return;
             showCustomAlert('Xác nhận', 'Bạn có chắc muốn xóa phiếu này không?', [
@@ -905,12 +1072,21 @@
             ]);
         }
 
-        // Sao chép nội dung phiếu
         function copyTicket() {
             if (!popupDetails.dataset.text) return;
             navigator.clipboard.writeText(popupDetails.dataset.text).then(() => {
                 showCustomAlert('Thành công', 'Đã sao chép nội dung phiếu!');
             });
+        }
+
+        function dataURLtoBlob(dataurl) {
+            const arr = dataurl.split(',');
+            const mime = arr[0].match(/:(.*?);/)[1];
+            const bstr = atob(arr[1]);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            while(n--) u8arr[n] = bstr.charCodeAt(n);
+            return new Blob([u8arr], { type: mime });
         }
     </script>
 </body>
