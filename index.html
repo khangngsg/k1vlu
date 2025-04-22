@@ -1,1093 +1,223 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ thống quản lý đơn phiếu tiếp nhận xe</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <style>
-        body {
-            font-family: 'Helvetica Neue', 'Arial', sans-serif;
-            background: #FFFFFF;
-            margin: 0;
-            padding: 20px;
-            color: #000000;
-            height: 100vh;
-            overflow-x: auto;
-        }
-
-        #loginPage {
-            background: #FFFFFF;
-            border: 1px solid #003087;
-            padding: 30px;
-            width: 350px;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-        #loginPage h2 {
-            font-size: 24px;
-            margin: 0 0 20px;
-            color: #003087;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        #passwordInput {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #003087;
-            font-size: 16px;
-            box-sizing: border-box;
-            background: #F5F5F5;
-            margin-bottom: 15px;
-            transition: border-color 0.3s ease;
-        }
-        #passwordInput:focus {
-            border-color: #FFC107;
-            outline: none;
-        }
-        #loginBtn {
-            padding: 10px 20px;
-            background: #003087;
-            border: none;
-            font-size: 16px;
-            color: #FFFFFF;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-        #loginBtn:hover {
-            background: #FFC107;
-            color: #000000;
-        }
-
-        #mainPage {
-            display: none;
-            max-width: 1200px;
-            margin: 0 auto;
-            position: relative;
-        }
-        .form-column {
-            background: #FFFFFF;
-            padding: 20px;
-            border: 1px solid #E0E0E0;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-        .form-column h2 {
-            font-size: 24px;
-            margin: 0 0 15px;
-            color: #003087;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            font-size: 14px;
-            margin-bottom: 5px;
-            color: #333333;
-        }
-        .form-group input, .form-group textarea {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #E0E0E0;
-            font-size: 14px;
-            box-sizing: border-box;
-            background: #F5F5F5;
-            transition: border-color 0.3s ease;
-        }
-        .form-group textarea {
-            height: 100px;
-            resize: vertical;
-        }
-        .form-group input:focus, .form-group textarea:focus {
-            border-color: #003087;
-            outline: none;
-        }
-        .checkbox-group {
-            display: flex;
-            gap: 15px;
-            margin-top: 5px;
-            flex-wrap: wrap;
-        }
-        .checkbox-group label {
-            font-size: 14px;
-            color: #333333;
-        }
-        .buttons {
-            margin-top: 20px;
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        .buttons button {
-            padding: 10px 20px;
-            background: #003087;
-            border: none;
-            font-size: 14px;
-            color: #FFFFFF;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-        .buttons button:hover {
-            background: #FFC107;
-            color: #000000;
-        }
-        .lock-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 8px 15px;
-            background: #003087;
-            border: none;
-            font-size: 14px;
-            color: #FFFFFF;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-        .lock-btn:hover {
-            background: #FFC107;
-            color: #000000;
-        }
-
-        .vehicle-section {
-            margin-bottom: 15px;
-        }
-        .vehicle-section h3 {
-            font-size: 16px;
-            margin: 0 0 10px;
-            color: #003087;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        .vehicle-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .vehicle-check {
-            flex: 1 1 calc(20% - 10px);
-            background: #F5F5F5;
-            padding: 8px;
-            border: 1px solid #E0E0E0;
-        }
-        .vehicle-check label {
-            font-size: 12px;
-            margin-bottom: 5px;
-            color: #333333;
-        }
-        .vehicle-check select {
-            width: 100%;
-            padding: 5px;
-            border: 1px solid #E0E0E0;
-            font-size: 12px;
-            background: #FFFFFF;
-        }
-        .vehicle-check input[type="text"] {
-            width: 100%;
-            padding: 5px;
-            margin-top: 5px;
-            display: none;
-            border: 1px solid #E0E0E0;
-            font-size: 12px;
-            background: #FFFFFF;
-        }
-
-        .ticket-sidebar {
-            position: fixed;
-            bottom: 20px;
-            right: 0;
-            width: 400px;
-            max-height: 80vh;
-            background: #FFFFFF;
-            border: 1px solid #E0E0E0;
-            padding: 15px;
-            transition: transform 0.3s ease;
-            z-index: 1000;
-            overflow-y: auto;
-            transform: translateX(100%);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-        .ticket-sidebar.active {
-            transform: translateX(0);
-        }
-        .ticket-sidebar h2 {
-            font-size: 18px;
-            margin: 0 0 10px;
-            color: #003087;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        .search-bar {
-            margin-bottom: 10px;
-        }
-        .search-bar input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #E0E0E0;
-            font-size: 14px;
-            background: #F5F5F5;
-        }
-        .ticket-item {
-            padding: 10px;
-            border-bottom: 1px solid #E0E0E0;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-        .ticket-item:hover {
-            background: #F5F5F5;
-        }
-        .ticket-item.received {
-            background: #FFF8E1;
-            border-left: 3px solid #FFC107;
-        }
-        .ticket-item span {
-            display: block;
-            font-size: 12px;
-            margin: 2px 0;
-            color: #333333;
-        }
-
-        .toggle-tickets-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 40px;
-            height: 40px;
-            background: #003087;
-            border: none;
-            font-size: 18px;
-            color: #FFFFFF;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-        .toggle-tickets-btn:hover {
-            background: #FFC107;
-            color: #000000;
-        }
-
-        .popup {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-        }
-        .popup-content {
-            background: #FFFFFF;
-            padding: 20px;
-            border: 1px solid #E0E0E0;
-            width: 90%;
-            max-width: 800px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        .popup-content h3 {
-            font-size: 20px;
-            margin: 0 0 15px;
-            color: #003087;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        .popup-content p {
-            margin: 5px 0;
-            font-size: 12px;
-            color: #333333;
-        }
-        .popup-content p.error {
-            font-weight: bold;
-            color: #FF0000;
-        }
-        .popup-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        .popup-buttons button {
-            padding: 8px 15px;
-            background: #003087;
-            border: none;
-            font-size: 14px;
-            color: #FFFFFF;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-        .popup-buttons button:hover {
-            background: #FFC107;
-            color: #000000;
-        }
-        .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 5px 10px;
-            background: #003087;
-            border: none;
-            font-size: 14px;
-            color: #FFFFFF;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-        .close-btn:hover {
-            background: #FFC107;
-            color: #000000;
-        }
-
-        .image-popup {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            justify-content: center;
-            align-items: center;
-            z-index: 2500;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        .image-popup.active {
-            opacity: 1;
-        }
-        .image-content {
-            position: relative;
-            transform: scale(0.8);
-            transition: transform 0.3s ease;
-            max-width: 90%;
-            max-height: 90vh;
-        }
-        .image-popup.active .image-content {
-            transform: scale(1);
-        }
-        .image-content img {
-            max-width: 100%;
-            max-height: 80vh;
-            border: 2px solid #FFFFFF;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        .custom-alert {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #FFFFFF;
-            border: 1px solid #003087;
-            padding: 20px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            z-index: 3000;
-            text-align: center;
-            width: 300px;
-        }
-        .custom-alert h3 {
-            font-size: 18px;
-            margin: 0 0 10px;
-            color: #003087;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        .custom-alert p {
-            font-size: 14px;
-            margin: 0 0 15px;
-            color: #333333;
-        }
-        .custom-alert-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-        .custom-alert-buttons button {
-            padding: 8px 15px;
-            background: #003087;
-            border: none;
-            font-size: 14px;
-            color: #FFFFFF;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-        .custom-alert-buttons button:hover {
-            background: #FFC107;
-            color: #000000;
-        }
-
-        .loading-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 2500;
-        }
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #003087;
-            border-top: 4px solid transparent;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @media (max-width: 768px) {
-            .form-column {
-                padding: 15px;
-            }
-            .vehicle-check {
-                flex: 1 1 calc(33.33% - 10px);
-            }
-            .ticket-sidebar {
-                width: 300px;
-            }
-            .popup-content {
-                width: 95%;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KTMESG Job Code Lookup</title>
+  <style>
+    body {
+      font-family: Tahoma, sans-serif;
+      background-color: #005C99;
+      color: #000;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background-color: #C0C0C0;
+      border: 2px outset #FFFFFF;
+      padding: 10px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    }
+    h1 {
+      color: #000080;
+      text-align: center;
+      font-size: 20px;
+      margin: 10px 0;
+      text-transform: uppercase;
+    }
+    .search-upload-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      gap: 10px;
+      padding: 5px;
+      background-color: #C0C0C0;
+      border: 2px inset #FFFFFF;
+    }
+    input[type="text"] {
+      padding: 5px;
+      width: 300px;
+      border: 2px inset #FFFFFF;
+      background-color: #FFFFFF;
+      font-family: Tahoma, sans-serif;
+      font-size: 14px;
+      outline: none;
+    }
+    input[type="file"] {
+      padding: 5px;
+      background-color: #FFFFFF;
+      border: 2px inset #FFFFFF;
+      font-family: Tahoma, sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button {
+      padding: 5px 15px;
+      background-color: #C0C0C0;
+      border: 2px outset #FFFFFF;
+      font-family: Tahoma, sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button:active {
+      border: 2px inset #FFFFFF;
+      background-color: #A0A0A0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #FFFFFF;
+      border: 2px inset #C0C0C0;
+      font-size: 14px;
+    }
+    th, td {
+      padding: 8px;
+      text-align: left;
+      border: 1px solid #808080;
+    }
+    th {
+      background-color: #000080;
+      color: #FFFFFF;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    tr:nth-child(even) {
+      background-color: #F0F0F0;
+    }
+    tr:hover {
+      background-color: #ADD8E6;
+    }
+    @media (max-width: 768px) {
+      .search-upload-section {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      input[type="text"], input[type="file"] {
+        width: 100%;
+      }
+      table {
+        font-size: 12px;
+      }
+      th, td {
+        padding: 5px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div id="loginPage">
-        <h2>Đăng nhập</h2>
-        <input type="password" id="passwordInput" placeholder="Nhập mật khẩu">
-        <button id="loginBtn">Đăng nhập</button>
+  <div class="container">
+    <h1>KTMESG Job Code Lookup</h1>
+    <div class="search-upload-section">
+      <input type="text" id="searchInput" placeholder="Search by Job Code or Customer Name" oninput="searchJobCodes()">
+      <div>
+        <input type="file" id="excelFile" accept=".xlsx, .xls" onchange="loadExcel()">
+        <button onclick="document.getElementById('excelFile').click()">Upload Excel</button>
+      </div>
     </div>
+    <table id="jobTable">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Date</th>
+          <th>Job code</th>
+          <th>Customer name</th>
+          <th>Part name</th>
+          <th>Part number</th>
+          <th>Qty</th>
+          <th>Export of PA</th>
+          <th>Description</th>
+          <th>Note</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="jobTableBody"></tbody>
+    </table>
+  </div>
 
-    <div id="mainPage" class="container">
-        <div class="form-column">
-            <h2>Ghi phiếu tiếp nhận</h2>
-            <form id="ticketForm">
-                <div class="form-group">
-                    <label>Ngày</label>
-                    <input type="date" name="date">
-                </div>
-                <div class="form-group">
-                    <label>Khách hàng</label>
-                    <input type="text" name="customer">
-                </div>
-                <div class="form-group">
-                    <label>VIN#</label>
-                    <input type="text" name="vin" required>
-                </div>
-                <div class="form-group">
-                    <label>Loại</label>
-                    <input type="text" name="type">
-                </div>
-                <div class="form-group">
-                    <label>Năm</label>
-                    <input type="number" name="year">
-                </div>
-                <div class="form-group">
-                    <label>Số km</label>
-                    <input type="number" name="km">
-                </div>
-                <div class="form-group">
-                    <label>Triệu hồi/Recall</label>
-                    <input type="text" name="recall">
-                </div>
-                <div class="form-group">
-                    <label>Kỹ thuật viên</label>
-                    <input type="text" name="technician">
-                </div>
-                <div class="form-group">
-                    <label>Biển số#</label>
-                    <input type="text" name="plate" required>
-                </div>
-                <div class="form-group">
-                    <label>Hình thức thanh toán</label>
-                    <div class="checkbox-group">
-                        <label><input type="checkbox" name="payment" value="Nội bộ"> Nội bộ</label>
-                        <label><input type="checkbox" name="payment" value="Bảo hành"> Bảo hành</label>
-                        <label><input type="checkbox" name="payment" value="KH thanh toán"> KH thanh toán</label>
-                        <label><input type="checkbox" name="payment" value="Test ride"> Test ride</label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Ảnh xe (tối đa 5 ảnh)</label>
-                    <input type="file" name="vehicle_images" accept="image/*" multiple>
-                    <div id="imagePreview" style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;"></div>
-                </div>
-                <div class="form-group">
-                    <label>Ghi nội dung cụ thể</label>
-                    <textarea name="notes" placeholder="Ghi chú thêm nếu có"></textarea>
-                </div>
-                <div class="vehicle-section">
-                    <h3>Phần Left</h3>
-                    <div class="vehicle-grid">
-                        <div class="vehicle-check"><label>Côn</label><select name="clutch"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="clutch_note"></div>
-                        <div class="vehicle-check"><label>Động cơ</label><select name="engine"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="engine_note"></div>
-                        <div class="vehicle-check"><label>Còi</label><select name="horn"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="horn_note"></div>
-                        <div class="vehicle-check"><label>Chống nghiêng</label><select name="lean"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="lean_note"></div>
-                        <div class="vehicle-check"><label>Gác chân</label><select name="footrest_left"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="footrest_left_note"></div>
-                    </div>
-                </div>
-                <div class="vehicle-section">
-                    <h3>Phần Right</h3>
-                    <div class="vehicle-grid">
-                        <div class="vehicle-check"><label>Truyền động</label><select name="transmission"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="transmission_note"></div>
-                        <div class="vehicle-check"><label>Phun xăng</label><select name="fuel_injection"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="fuel_injection_note"></div>
-                        <div class="vehicle-check"><label>Tay ga</label><select name="throttle"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="throttle_note"></div>
-                        <div class="vehicle-check"><label>Ống xả</label><select name="exhaust"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="exhaust_note"></div>
-                        <div class="vehicle-check"><label>Cần đạp phanh</label><select name="brake_pedal"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="brake_pedal_note"></div>
-                        <div class="vehicle-check"><label>Gác chân</label><select name="footrest_right"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="footrest_right_note"></div>
-                    </div>
-                </div>
-                <div class="vehicle-section">
-                    <h3>Phần Rear</h3>
-                    <div class="vehicle-grid">
-                        <div class="vehicle-check"><label>Đèn đuôi</label><select name="tail_light"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="tail_light_note"></div>
-                        <div class="vehicle-check"><label>Xi nhan</label><select name="turn_signal_rear"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="turn_signal_rear_note"></div>
-                        <div class="vehicle-check"><label>Đèn phanh</label><select name="brake_light"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="brake_light_note"></div>
-                        <div class="vehicle-check"><label>Phanh</label><select name="brake_rear"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="brake_rear_note"></div>
-                        <div class="vehicle-check"><label>Hộp dầu phanh</label><select name="brake_fluid"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="brake_fluid_note"></div>
-                        <div class="vehicle-check"><label>Giảm xóc sau</label><select name="rear_shock"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="rear_shock_note"></div>
-                        <div class="vehicle-check"><label>Bánh sau</label><select name="rear_wheel"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="rear_wheel_note"></div>
-                    </div>
-                </div>
-                <div class="vehicle-section">
-                    <h3>Phần Trên</h3>
-                    <div class="vehicle-grid">
-                        <div class="vehicle-check"><label>Tay lái</label><select name="handlebar"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="handlebar_note"></div>
-                        <div class="vehicle-check"><label>Bình xăng</label><select name="fuel_tank"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="fuel_tank_note"></div>
-                        <div class="vehicle-check"><label>Tay phanh</label><select name="brake_lever"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="brake_lever_note"></div>
-                        <div class="vehicle-check"><label>Chắn bùn</label><select name="mudguard"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="mudguard_note"></div>
-                        <div class="vehicle-check"><label>Yên</label><select name="seat"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="seat_note"></div>
-                    </div>
-                </div>
-                <div class="vehicle-section">
-                    <h3>Phần Trước</h3>
-                    <div class="vehicle-grid">
-                        <div class="vehicle-check"><label>Đèn pha</label><select name="headlight"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="headlight_note"></div>
-                        <div class="vehicle-check"><label>Xi nhan</label><select name="turn_signal_front"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="turn_signal_front_note"></div>
-                        <div class="vehicle-check"><label>Bánh trước</label><select name="front_wheel"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="front_wheel_note"></div>
-                        <div class="vehicle-check"><label>Gương chiếu hậu</label><select name="mirror"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="mirror_note"></div>
-                        <div class="vehicle-check"><label>Giảm xóc trước</label><select name="front_shock"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="front_shock_note"></div>
-                        <div class="vehicle-check"><label>Tay nắm</label><select name="grip"><option value="OK">OK</option><option value="Có vấn đề">Có vấn đề</option></select><input type="text" name="grip_note"></div>
-                    </div>
-                </div>
-                <div class="buttons">
-                    <button type="submit" class="save-btn" id="saveBtn">Lưu phiếu</button>
-                    <button type="submit" class="update-btn" id="updateBtn" style="display: none;">Cập nhật phiếu</button>
-                    <button type="reset" class="clear-btn">Xóa</button>
-                    <button type="button" class="screenshot-btn" id="screenshotBtn" disabled>Chụp ảnh</button>
-                </div>
-            </form>
-            <button class="lock-btn" id="lockBtn">Khóa trang</button>
-        </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script>
+    let jobCodes = [];
 
-        <div class="ticket-sidebar" id="ticketSidebar">
-            <h2>Danh sách phiếu đã lưu</h2>
-            <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="Tìm theo tên, VIN, biển số...">
-            </div>
-            <div id="ticketList"></div>
-        </div>
+    // Convert Excel date (serial number) to readable date
+    function excelDateToJSDate(serial) {
+      if (!serial) return '';
+      const utc_days = Math.floor(serial - 25569);
+      const utc_value = utc_days * 86400;
+      const date_info = new Date(utc_value * 1000);
+      return date_info.toLocaleDateString('en-GB'); // Format: DD/MM/YYYY
+    }
 
-        <button class="toggle-tickets-btn" id="toggleTicketsBtn">📋</button>
+    // Determine status display
+    function getStatusDisplay(row) {
+      const exportPA = (row['Export of PA'] || '').toString().toLowerCase();
+      if (!exportPA || exportPA === 'đã xuất, chưa to' || exportPA === 'chưa to') {
+        return 'Waiting';
+      }
+      switch (row.Status) {
+        case 1:
+          return 'Hoàn thành';
+        case 0.5:
+          return 'Bảo hành/Đang xử lý';
+        case 0:
+          return 'Chưa TO';
+        default:
+          return row.Status || 'Chưa TO';
+      }
+    }
 
-        <div class="popup" id="ticketPopup">
-            <div class="popup-content" id="popupContent">
-                <h3>Chi tiết phiếu</h3>
-                <button class="close-btn" onclick="closePopup()">X</button>
-                <div id="popupDetails"></div>
-                <div class="popup-buttons">
-                    <button class="edit-btn" onclick="editTicket()">Sửa</button>
-                    <button class="delete-btn" onclick="deleteTicket()">Xóa</button>
-                    <button class="copy-btn" onclick="copyTicket()">Copy</button>
-                    <button class="screenshot-btn" onclick="takeScreenshot()">Chụp ảnh</button>
-                </div>
-            </div>
-        </div>
+    // Load and process Excel file
+    function loadExcel() {
+      const fileInput = document.getElementById('excelFile');
+      const file = fileInput.files[0];
+      if (!file) return;
 
-        <div class="image-popup" id="imagePopup">
-            <div class="image-content">
-                <img id="popupImage" src="" alt="Ảnh xe">
-            </div>
-        </div>
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        jobCodes = XLSX.utils.sheet_to_json(sheet);
+        displayJobCodes(jobCodes);
+      };
+      reader.readAsArrayBuffer(file);
+    }
 
-        <div class="loading-overlay" id="loadingOverlay">
-            <div class="loading-spinner"></div>
-        </div>
+    // Display job codes in table
+    function displayJobCodes(data) {
+      const tableBody = document.getElementById('jobTableBody');
+      tableBody.innerHTML = '';
+      data.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${row.No || ''}</td>
+          <td>${excelDateToJSDate(row.Date) || ''}</td>
+          <td>${row['Job code'] || ''}</td>
+          <td>${row['Customer name'] || ''}</td>
+          <td>${row['Part name'] || ''}</td>
+          <td>${row['Part number'] || ''}</td>
+          <td>${row.Qty || ''}</td>
+          <td>${row['Export of PA'] || ''}</td>
+          <td>${row.Description || ''}</td>
+          <td>${row.Note || ''}</td>
+          <td>${getStatusDisplay(row)}</td>
+        `;
+        tableBody.appendChild(tr);
+      });
+    }
 
-        <div class="custom-alert" id="customAlert">
-            <h3 id="alertTitle"></h3>
-            <p id="alertMessage"></p>
-            <div class="custom-alert-buttons" id="alertButtons"></div>
-        </div>
-    </div>
-
-    <script>
-        const form = document.getElementById('ticketForm');
-        const ticketList = document.getElementById('ticketList');
-        const ticketSidebar = document.getElementById('ticketSidebar');
-        const toggleTicketsBtn = document.getElementById('toggleTicketsBtn');
-        const popup = document.getElementById('ticketPopup');
-        const popupContent = document.getElementById('popupContent');
-        const popupDetails = document.getElementById('popupDetails');
-        const saveBtn = document.getElementById('saveBtn');
-        const updateBtn = document.getElementById('updateBtn');
-        const screenshotBtn = document.getElementById('screenshotBtn');
-        const loginPage = document.getElementById('loginPage');
-        const mainPage = document.getElementById('mainPage');
-        const passwordInput = document.getElementById('passwordInput');
-        const loginBtn = document.getElementById('loginBtn');
-        const lockBtn = document.getElementById('lockBtn');
-        const searchInput = document.getElementById('searchInput');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const customAlert = document.getElementById('customAlert');
-        const alertTitle = document.getElementById('alertTitle');
-        const alertMessage = document.getElementById('alertMessage');
-        const alertButtons = document.getElementById('alertButtons');
-        const imagePopup = document.getElementById('imagePopup');
-        const popupImage = document.getElementById('popupImage');
-        const imageInput = form.querySelector('[name="vehicle_images"]');
-        const imagePreview = document.getElementById('imagePreview');
-        let tickets = JSON.parse(localStorage.getItem('tickets')) || [];
-        let currentTicketIndex = null;
-        const correctPassword = '132004';
-        let isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-        let imageFiles = [];
-
-        function showLoading() {
-            loadingOverlay.style.display = 'flex';
-        }
-
-        function hideLoading() {
-            loadingOverlay.style.display = 'none';
-        }
-
-        function showCustomAlert(title, message, buttons = [{ text: 'OK', callback: () => {} }]) {
-            alertTitle.textContent = title;
-            alertMessage.textContent = message;
-            alertButtons.innerHTML = '';
-            buttons.forEach(btn => {
-                const button = document.createElement('button');
-                button.textContent = btn.text;
-                button.addEventListener('click', () => {
-                    customAlert.style.display = 'none';
-                    btn.callback();
-                });
-                alertButtons.appendChild(button);
-            });
-            customAlert.style.display = 'block';
-        }
-
-        loginBtn.addEventListener('click', () => {
-            if (passwordInput.value === correctPassword) {
-                isLoggedIn = true;
-                localStorage.setItem('isLoggedIn', 'true');
-                loginPage.style.display = 'none';
-                mainPage.style.display = 'block';
-                passwordInput.value = '';
-            } else {
-                showCustomAlert('Lỗi', 'Mật khẩu sai! Vui lòng thử lại.');
-                passwordInput.value = '';
-            }
-        });
-
-        lockBtn.addEventListener('click', () => {
-            isLoggedIn = false;
-            localStorage.setItem('isLoggedIn', 'false');
-            mainPage.style.display = 'none';
-            loginPage.style.display = 'block';
-            ticketSidebar.classList.remove('active');
-            screenshotBtn.disabled = true;
-        });
-
-        if (isLoggedIn) {
-            loginPage.style.display = 'none';
-            mainPage.style.display = 'block';
-        } else {
-            loginPage.style.display = 'block';
-            mainPage.style.display = 'none';
-        }
-
-        toggleTicketsBtn.addEventListener('click', () => {
-            ticketSidebar.classList.toggle('active');
-            if (ticketSidebar.classList.contains('active')) {
-                renderTicketList();
-            }
-        });
-        document.addEventListener('click', (e) => {
-            if (!ticketSidebar.contains(e.target) && !toggleTicketsBtn.contains(e.target)) {
-                ticketSidebar.classList.remove('active');
-            }
-        });
-
-        document.querySelectorAll('.vehicle-check select').forEach(select => {
-            select.addEventListener('change', (e) => {
-                const input = e.target.nextElementSibling;
-                input.style.display = e.target.value === 'Có vấn đề' ? 'inline-block' : 'none';
-            });
-        });
-
-        imageInput.addEventListener('change', (e) => {
-            imagePreview.innerHTML = '';
-            imageFiles = Array.from(e.target.files).slice(0, 5);
-            renderImagePreview();
-        });
-
-        function renderImagePreview() {
-            imagePreview.innerHTML = '';
-            imageFiles.forEach((file, index) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const imgContainer = document.createElement('div');
-                    imgContainer.style.position = 'relative';
-                    imgContainer.style.width = '100px';
-                    imgContainer.style.height = '100px';
-                    
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    img.style.width = '100%';
-                    img.style.height = '100%';
-                    img.style.objectFit = 'cover';
-                    img.style.cursor = 'pointer';
-                    img.addEventListener('click', () => showImagePopup(e.target.result));
-                    
-                    const removeBtn = document.createElement('button');
-                    removeBtn.textContent = 'X';
-                    removeBtn.style.position = 'absolute';
-                    removeBtn.style.top = '0';
-                    removeBtn.style.right = '0';
-                    removeBtn.style.background = '#003087';
-                    removeBtn.style.color = '#FFFFFF';
-                    removeBtn.style.border = 'none';
-                    removeBtn.style.padding = '2px 6px';
-                    removeBtn.style.cursor = 'pointer';
-                    removeBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        imageFiles.splice(index, 1);
-                        renderImagePreview();
-                    });
-                    
-                    imgContainer.appendChild(img);
-                    imgContainer.appendChild(removeBtn);
-                    imagePreview.appendChild(imgContainer);
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function showImagePopup(src) {
-            popupImage.src = src;
-            imagePopup.style.display = 'flex';
-            setTimeout(() => imagePopup.classList.add('active'), 10);
-        }
-
-        imagePopup.addEventListener('click', (e) => {
-            if (e.target === imagePopup) {
-                imagePopup.classList.remove('active');
-                setTimeout(() => imagePopup.style.display = 'none', 300);
-            }
-        });
-
-        async function takeScreenshot() {
-            if (!popup.style.display || popup.style.display === 'none') {
-                showCustomAlert('Lỗi', 'Vui lòng mở popup chi tiết trước khi chụp ảnh!');
-                return;
-            }
-
-            showLoading();
-            try {
-                const canvas = await html2canvas(popupContent, {
-                    scale: 2, // Độ phân giải cao
-                    useCORS: true,
-                    backgroundColor: '#FFFFFF',
-                    scrollX: 0,
-                    scrollY: -window.scrollY, // Đảm bảo lấy từ đầu trang
-                    height: popupContent.scrollHeight, // Chụp toàn bộ chiều cao nội dung
-                    windowHeight: popupContent.scrollHeight // Đặt chiều cao canvas bằng nội dung thực tế
-                });
-                const imgData = canvas.toDataURL('image/png');
-                const link = document.createElement('a');
-                link.href = imgData;
-                link.download = `${tickets[currentTicketIndex].vin}_${tickets[currentTicketIndex].plate}_Screenshot.png`;
-                link.click();
-                hideLoading();
-                showCustomAlert('Thành công', 'Ảnh đã được chụp và tải về thành công!');
-            } catch (error) {
-                hideLoading();
-                console.error('Lỗi khi chụp ảnh:', error);
-                showCustomAlert('Lỗi', 'Không thể chụp ảnh. Vui lòng thử lại!');
-            }
-        }
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(form);
-            const ticket = {
-                date: formData.get('date'),
-                customer: formData.get('customer'),
-                vin: formData.get('vin'),
-                type: formData.get('type'),
-                year: formData.get('year'),
-                km: formData.get('km'),
-                recall: formData.get('recall'),
-                technician: formData.get('technician'),
-                plate: formData.get('plate'),
-                payment: formData.getAll('payment'),
-                images: await Promise.all(imageFiles.map(file => 
-                    new Promise(resolve => {
-                        const reader = new FileReader();
-                        reader.onload = (e) => resolve(e.target.result);
-                        reader.readAsDataURL(file);
-                    })
-                )),
-                notes: formData.get('notes'),
-                vehicle: {
-                    clutch: { status: formData.get('clutch'), note: formData.get('clutch_note') },
-                    engine: { status: formData.get('engine'), note: formData.get('engine_note') },
-                    horn: { status: formData.get('horn'), note: formData.get('horn_note') },
-                    lean: { status: formData.get('lean'), note: formData.get('lean_note') },
-                    footrest_left: { status: formData.get('footrest_left'), note: formData.get('footrest_left_note') },
-                    transmission: { status: formData.get('transmission'), note: formData.get('transmission_note') },
-                    fuel_injection: { status: formData.get('fuel_injection'), note: formData.get('fuel_injection_note') },
-                    throttle: { status: formData.get('throttle'), note: formData.get('throttle_note') },
-                    exhaust: { status: formData.get('exhaust'), note: formData.get('exhaust_note') },
-                    brake_pedal: { status: formData.get('brake_pedal'), note: formData.get('brake_pedal_note') },
-                    footrest_right: { status: formData.get('footrest_right'), note: formData.get('footrest_right_note') },
-                    tail_light: { status: formData.get('tail_light'), note: formData.get('tail_light_note') },
-                    turn_signal_rear: { status: formData.get('turn_signal_rear'), note: formData.get('turn_signal_rear_note') },
-                    brake_light: { status: formData.get('brake_light'), note: formData.get('brake_light_note') },
-                    brake_rear: { status: formData.get('brake_rear'), note: formData.get('brake_rear_note') },
-                    brake_fluid: { status: formData.get('brake_fluid'), note: formData.get('brake_fluid_note') },
-                    rear_shock: { status: formData.get('rear_shock'), note: formData.get('rear_shock_note') },
-                    rear_wheel: { status: formData.get('rear_wheel'), note: formData.get('rear_wheel_note') },
-                    handlebar: { status: formData.get('handlebar'), note: formData.get('handlebar_note') },
-                    fuel_tank: { status: formData.get('fuel_tank'), note: formData.get('fuel_tank_note') },
-                    brake_lever: { status: formData.get('brake_lever'), note: formData.get('brake_lever_note') },
-                    mudguard: { status: formData.get('mudguard'), note: formData.get('mudguard_note') },
-                    seat: { status: formData.get('seat'), note: formData.get('seat_note') },
-                    headlight: { status: formData.get('headlight'), note: formData.get('headlight_note') },
-                    turn_signal_front: { status: formData.get('turn_signal_front'), note: formData.get('turn_signal_front_note') },
-                    front_wheel: { status: formData.get('front_wheel'), note: formData.get('front_wheel_note') },
-                    mirror: { status: formData.get('mirror'), note: formData.get('mirror_note') },
-                    front_shock: { status: formData.get('front_shock'), note: formData.get('front_shock_note') },
-                    grip: { status: formData.get('grip'), note: formData.get('grip_note') }
-                },
-                status: 'received'
-            };
-
-            if (currentTicketIndex !== null) {
-                showCustomAlert('Xác nhận', 'Bạn có chắc muốn cập nhật phiếu này không?', [
-                    { text: 'Có', callback: async () => {
-                        showLoading();
-                        await new Promise(resolve => setTimeout(resolve, 1000));
-                        tickets[currentTicketIndex] = ticket;
-                        currentTicketIndex = null;
-                        saveBtn.style.display = 'inline-block';
-                        updateBtn.style.display = 'none';
-                        screenshotBtn.disabled = true;
-                        localStorage.setItem('tickets', JSON.stringify(tickets));
-                        form.reset();
-                        imageFiles = [];
-                        imagePreview.innerHTML = '';
-                        document.querySelectorAll('.vehicle-check input[type="text"]').forEach(input => input.style.display = 'none');
-                        hideLoading();
-                        showCustomAlert('Thành công', 'Phiếu đã được cập nhật thành công!');
-                    }},
-                    { text: 'Không', callback: () => {} }
-                ]);
-            } else {
-                showCustomAlert('Xác nhận', 'Bạn có chắc muốn lưu phiếu này không?', [
-                    { text: 'Có', callback: async () => {
-                        showLoading();
-                        await new Promise(resolve => setTimeout(resolve, 1000));
-                        tickets.push(ticket);
-                        localStorage.setItem('tickets', JSON.stringify(tickets));
-                        form.reset();
-                        imageFiles = [];
-                        imagePreview.innerHTML = '';
-                        document.querySelectorAll('.vehicle-check input[type="text"]').forEach(input => input.style.display = 'none');
-                        hideLoading();
-                        showCustomAlert('Thành công', 'Phiếu đã được lưu thành công!');
-                    }},
-                    { text: 'Không', callback: () => {} }
-                ]);
-            }
-            renderTicketList();
-        });
-
-        screenshotBtn.addEventListener('click', () => {
-            if (!popup.style.display || popup.style.display === 'none') {
-                showCustomAlert('Lỗi', 'Vui lòng mở popup chi tiết trước khi chụp ảnh!');
-            } else {
-                takeScreenshot();
-            }
-        });
-
-        function renderTicketList(searchTerm = '') {
-            ticketList.innerHTML = '';
-            const filteredTickets = tickets.filter(ticket => {
-                const term = searchTerm.toLowerCase();
-                return (
-                    (ticket.customer && ticket.customer.toLowerCase().includes(term)) ||
-                    (ticket.vin && ticket.vin.toLowerCase().includes(term)) ||
-                    (ticket.plate && ticket.plate.toLowerCase().includes(term))
-                );
-            });
-            filteredTickets.forEach((ticket, originalIndex) => {
-                const ticketItem = document.createElement('div');
-                ticketItem.classList.add('ticket-item');
-                if (ticket.status === 'received') ticketItem.classList.add('received');
-                ticketItem.innerHTML = `
-                    <span>Phiếu #${originalIndex + 1}</span>
-                    <span>Ngày: ${ticket.date || 'Chưa ghi'}</span>
-                    <span>Khách hàng: ${ticket.customer || 'Chưa ghi'}</span>
-                    <span>VIN#: ${ticket.vin}</span>
-                    <span>Biển số#: ${ticket.plate}</span>
-                    ${ticket.status === 'received' ? '<span>Trạng thái: Đã tiếp nhận</span>' : ''}
-                `;
-                ticketItem.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    showPopup(ticket, originalIndex);
-                });
-                ticketList.appendChild(ticketItem);
-            });
-        }
-
-        searchInput.addEventListener('input', (e) => {
-            renderTicketList(e.target.value);
-        });
-
-        function showPopup(ticket, index) {
-            currentTicketIndex = index;
-            let vehicleDetails = '';
-            for (const [part, { status, note }] of Object.entries(ticket.vehicle)) {
-                const partName = part.replace(/_/g, ' ').toUpperCase();
-                const isError = status === 'Có vấn đề';
-                vehicleDetails += `<p ${isError ? 'class="error"' : ''}>${partName}: ${status}${note ? ' - ' + note : ''}</p>`;
-            }
-            let imagesHTML = '';
-            if (ticket.images && ticket.images.length) {
-                imagesHTML = '<p><strong>Ảnh xe:</strong></p>';
-                ticket.images.forEach((src) => {
-                    imagesHTML += `<img src="${src}" style="width: 100px; height: 100px; margin: 5px; cursor: pointer;" onclick="showImagePopup('${src}')">`;
-                });
-            }
-            const ticketDetails = `
-                <p>Phiếu #${index + 1}</p>
-                <p>Ngày: ${ticket.date || 'Chưa ghi'}</p>
-                <p>Khách hàng: ${ticket.customer || 'Chưa ghi'}</p>
-                <p>VIN#: ${ticket.vin}</p>
-                <p>Loại: ${ticket.type || 'Chưa ghi'}</p>
-                <p>Năm: ${ticket.year || 'Chưa ghi'}</p>
-                <p>Số km: ${ticket.km || 'Chưa ghi'}</p>
-                <p>Triệu hồi/Recall: ${ticket.recall || 'Chưa ghi'}</p>
-                <p>Kỹ thuật viên: ${ticket.technician || 'Chưa ghi'}</p>
-                <p>Biển số#: ${ticket.plate}</p>
-                <p>Hình thức thanh toán: ${ticket.payment && ticket.payment.length ? ticket.payment.join(', ') : 'Chưa chọn'}</p>
-                <p>Trạng thái: ${ticket.status === 'received' ? 'Đã tiếp nhận' : 'Chưa tiếp nhận'}</p>
-                ${ticket.notes ? `<p><strong>Ghi nội dung cụ thể:</strong> ${ticket.notes}</p>` : ''}
-                ${imagesHTML}
-                <p><strong>Về xe:</strong></p>
-                ${vehicleDetails}
-            `;
-            popupDetails.innerHTML = ticketDetails;
-            popupDetails.dataset.text = ticketDetails.replace(/<[^>]+>/g, '');
-            popup.style.display = 'flex';
-            ticketSidebar.classList.remove('active');
-            screenshotBtn.disabled = false;
-        }
-
-        function closePopup() {
-            popup.style.display = 'none';
-            currentTicketIndex = null;
-            screenshotBtn.disabled = true;
-        }
-
-        function editTicket() {
-            if (currentTicketIndex === null) return;
-            const ticket = tickets[currentTicketIndex];
-            form.querySelector('[name="date"]').value = ticket.date || '';
-            form.querySelector('[name="customer"]').value = ticket.customer || '';
-            form.querySelector('[name="vin"]').value = ticket.vin || '';
-            form.querySelector('[name="type"]').value = ticket.type || '';
-            form.querySelector('[name="year"]').value = ticket.year || '';
-            form.querySelector('[name="km"]').value = ticket.km || '';
-            form.querySelector('[name="recall"]').value = ticket.recall || '';
-            form.querySelector('[name="technician"]').value = ticket.technician || '';
-            form.querySelector('[name="plate"]').value = ticket.plate || '';
-            form.querySelector('[name="notes"]').value = ticket.notes || '';
-            document.querySelectorAll('[name="payment"]').forEach(checkbox => {
-                checkbox.checked = ticket.payment.includes(checkbox.value);
-            });
-            if (ticket.images && ticket.images.length) {
-                imageFiles = ticket.images.map(src => {
-                    const blob = dataURLtoBlob(src);
-                    return new File([blob], `image_${Date.now()}.jpg`, { type: 'image/jpeg' });
-                });
-                renderImagePreview();
-            }
-            for (const [part, { status, note }] of Object.entries(ticket.vehicle)) {
-                const select = form.querySelector(`[name="${part}"]`);
-                if (select) {
-                    select.value = status;
-                    const input = form.querySelector(`[name="${part}_note"]`);
-                    if (input) {
-                        input.value = note || '';
-                        input.style.display = status === 'Có vấn đề' ? 'inline-block' : 'none';
-                    }
-                }
-            }
-            saveBtn.style.display = 'none';
-            updateBtn.style.display = 'inline-block';
-            screenshotBtn.disabled = true;
-            closePopup();
-        }
-
-        function deleteTicket() {
-            if (currentTicketIndex === null) return;
-            showCustomAlert('Xác nhận', 'Bạn có chắc muốn xóa phiếu này không?', [
-                { text: 'Có', callback: () => {
-                    showLoading();
-                    setTimeout(() => {
-                        tickets.splice(currentTicketIndex, 1);
-                        localStorage.setItem('tickets', JSON.stringify(tickets));
-                        renderTicketList();
-                        closePopup();
-                        hideLoading();
-                        showCustomAlert('Thành công', 'Phiếu đã được xóa thành công!');
-                    }, 1000);
-                }},
-                { text: 'Không', callback: () => {} }
-            ]);
-        }
-
-        function copyTicket() {
-            if (!popupDetails.dataset.text) return;
-            navigator.clipboard.writeText(popupDetails.dataset.text).then(() => {
-                showCustomAlert('Thành công', 'Đã sao chép nội dung phiếu!');
-            });
-        }
-
-        function dataURLtoBlob(dataurl) {
-            const arr = dataurl.split(',');
-            const mime = arr[0].match(/:(.*?);/)[1];
-            const bstr = atob(arr[1]);
-            let n = bstr.length;
-            const u8arr = new Uint8Array(n);
-            while(n--) u8arr[n] = bstr.charCodeAt(n);
-            return new Blob([u8arr], { type: mime });
-        }
-    </script>
+    // Search job codes
+    function searchJobCodes() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const filteredData = jobCodes.filter(row =>
+        (row['Job code'] && row['Job code'].toLowerCase().includes(query)) ||
+        (row['Customer name'] && row['Customer name'].toLowerCase().includes(query))
+      );
+      displayJobCodes(filteredData);
+    }
+  </script>
 </body>
 </html>
