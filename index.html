@@ -1,223 +1,279 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KTMESG Job Code Lookup</title>
-  <style>
-    body {
-      font-family: Tahoma, sans-serif;
-      background-color: #005C99;
-      color: #000;
-      margin: 0;
-      padding: 20px;
-    }
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      background-color: #C0C0C0;
-      border: 2px outset #FFFFFF;
-      padding: 10px;
-      box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-    }
-    h1 {
-      color: #000080;
-      text-align: center;
-      font-size: 20px;
-      margin: 10px 0;
-      text-transform: uppercase;
-    }
-    .search-upload-section {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-      gap: 10px;
-      padding: 5px;
-      background-color: #C0C0C0;
-      border: 2px inset #FFFFFF;
-    }
-    input[type="text"] {
-      padding: 5px;
-      width: 300px;
-      border: 2px inset #FFFFFF;
-      background-color: #FFFFFF;
-      font-family: Tahoma, sans-serif;
-      font-size: 14px;
-      outline: none;
-    }
-    input[type="file"] {
-      padding: 5px;
-      background-color: #FFFFFF;
-      border: 2px inset #FFFFFF;
-      font-family: Tahoma, sans-serif;
-      font-size: 14px;
-      cursor: pointer;
-    }
-    button {
-      padding: 5px 15px;
-      background-color: #C0C0C0;
-      border: 2px outset #FFFFFF;
-      font-family: Tahoma, sans-serif;
-      font-size: 14px;
-      cursor: pointer;
-    }
-    button:active {
-      border: 2px inset #FFFFFF;
-      background-color: #A0A0A0;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background-color: #FFFFFF;
-      border: 2px inset #C0C0C0;
-      font-size: 14px;
-    }
-    th, td {
-      padding: 8px;
-      text-align: left;
-      border: 1px solid #808080;
-    }
-    th {
-      background-color: #000080;
-      color: #FFFFFF;
-      font-weight: bold;
-      text-transform: uppercase;
-    }
-    tr:nth-child(even) {
-      background-color: #F0F0F0;
-    }
-    tr:hover {
-      background-color: #ADD8E6;
-    }
-    @media (max-width: 768px) {
-      .search-upload-section {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      input[type="text"], input[type="file"] {
-        width: 100%;
-      }
-      table {
-        font-size: 12px;
-      }
-      th, td {
-        padding: 5px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classic MacOS Dictionary</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Helvetica', Arial, sans-serif;
+        }
+
+        body {
+            background: #e6e6e6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: #ffffff;
+            border: 1px solid #999;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 960px;
+            padding: 20px;
+            aspect-ratio: 16 / 10;
+            display: flex;
+            flex-direction: column;
+            gap.CallbackHandler: 20px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background: #e6e6e6;
+            padding: 10px;
+            border: 1px solid #999;
+            border-radius: 4px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #999;
+            border-radius: 4px;
+            font-size: 16px;
+            outline: none;
+            background: #ffffff;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: 1px solid #999;
+            border-radius: 4px;
+            background: linear-gradient(#ffffff, #d4d4d4);
+            color: #000;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: linear-gradient(#d4d4d4, #ffffff);
+        }
+
+        .result {
+            background: #ffffff;
+            border: 1px solid #999;
+            border-radius: 4px;
+            padding: 15px;
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .word-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .word {
+            font-size: 28px;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .phonetic {
+            font-size: 16px;
+            color: #555;
+        }
+
+        .speaker {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: #000;
+        }
+
+        .speaker.web-speech {
+            color: #666; /* Màu khác khi dùng Web Speech API */
+        }
+
+        .speaker:disabled {
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .speaker:hover:not(:disabled) {
+            color: #555;
+        }
+
+        .meaning {
+            font-size: 16px;
+            color: #000;
+            line-height: 1.5;
+        }
+
+        .save-img {
+            background: linear-gradient(#ffffff, #d4d4d4);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                aspect-ratio: auto;
+                height: 90vh;
+            }
+
+            .word {
+                font-size:  Sử dụng Web Speech API làm dự phòng24px;
+            }
+
+            .phonetic {
+                font-size: 14px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>KTMESG Job Code Lookup</h1>
-    <div class="search-upload-section">
-      <input type="text" id="searchInput" placeholder="Search by Job Code or Customer Name" oninput="searchJobCodes()">
-      <div>
-        <input type="file" id="excelFile" accept=".xlsx, .xls" onchange="loadExcel()">
-        <button onclick="document.getElementById('excelFile').click()">Upload Excel</button>
-      </div>
+    <div class="container">
+        <div class="search-box">
+            <input type="text" id="wordInput" placeholder="Enter a word...">
+            <button onclick="searchWord()">Search</button>
+        </div>
+        <div class="result" id="result">
+            <div class="word-header">
+                <h1 class="word" id="word"></h1>
+                <span class="phonetic" id="phonetic"></span>
+                <button class="speaker" id="speaker" onclick="playSound()">🔊</button>
+            </div>
+            <p class="meaning" id="meaning"></p>
+            <button class="save-img" onclick="saveAsImage()">Save as Image</button>
+        </div>
     </div>
-    <table id="jobTable">
-      <thead>
-        <tr>
-          <th>No</th>
-          <th>Date</th>
-          <th>Job code</th>
-          <th>Customer name</th>
-          <th>Part name</th>
-          <th>Part number</th>
-          <th>Qty</th>
-          <th>Export of PA</th>
-          <th>Description</th>
-          <th>Note</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="jobTableBody"></tbody>
-    </table>
-  </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script>
-    let jobCodes = [];
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        let currentAudioUrl = '';
+        let currentWord = '';
+        let useWebSpeech = false;
 
-    // Convert Excel date (serial number) to readable date
-    function excelDateToJSDate(serial) {
-      if (!serial) return '';
-      const utc_days = Math.floor(serial - 25569);
-      const utc_value = utc_days * 86400;
-      const date_info = new Date(utc_value * 1000);
-      return date_info.toLocaleDateString('en-GB'); // Format: DD/MM/YYYY
-    }
+        async function searchWord() {
+            const word = document.getElementById('wordInput').value.toLowerCase().trim();
+            const resultDiv = document.getElementById('result');
+            const wordEl = document.getElementById('word');
+            const phoneticEl = document.getElementById('phonetic');
+            const meaningEl = document.getElementById('meaning');
+            const speakerBtn = document.getElementById('speaker');
 
-    // Determine status display
-    function getStatusDisplay(row) {
-      const exportPA = (row['Export of PA'] || '').toString().toLowerCase();
-      if (!exportPA || exportPA === 'đã xuất, chưa to' || exportPA === 'chưa to') {
-        return 'Waiting';
-      }
-      switch (row.Status) {
-        case 1:
-          return 'Hoàn thành';
-        case 0.5:
-          return 'Bảo hành/Đang xử lý';
-        case 0:
-          return 'Chưa TO';
-        default:
-          return row.Status || 'Chưa TO';
-      }
-    }
+            if (!word) {
+                alert('Please enter a word!');
+                return;
+            }
 
-    // Load and process Excel file
-    function loadExcel() {
-      const fileInput = document.getElementById('excelFile');
-      const file = fileInput.files[0];
-      if (!file) return;
+            try {
+                const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+                if (!response.ok) {
+                    throw new Error('Word not found');
+                }
+                const data = await response.json();
+                const entry = data[0];
 
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const sheetName = workbook.SheetNames[0];
-        const sheet = workbook.Sheets[sheetName];
-        jobCodes = XLSX.utils.sheet_to_json(sheet);
-        displayJobCodes(jobCodes);
-      };
-      reader.readAsArrayBuffer(file);
-    }
+                // Hiển thị từ
+                wordEl.textContent = entry.word.charAt(0).toUpperCase() + entry.word.slice(1);
+                currentWord = entry.word;
 
-    // Display job codes in table
-    function displayJobCodes(data) {
-      const tableBody = document.getElementById('jobTableBody');
-      tableBody.innerHTML = '';
-      data.forEach(row => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${row.No || ''}</td>
-          <td>${excelDateToJSDate(row.Date) || ''}</td>
-          <td>${row['Job code'] || ''}</td>
-          <td>${row['Customer name'] || ''}</td>
-          <td>${row['Part name'] || ''}</td>
-          <td>${row['Part number'] || ''}</td>
-          <td>${row.Qty || ''}</td>
-          <td>${row['Export of PA'] || ''}</td>
-          <td>${row.Description || ''}</td>
-          <td>${row.Note || ''}</td>
-          <td>${getStatusDisplay(row)}</td>
-        `;
-        tableBody.appendChild(tr);
-      });
-    }
+                // Lấy phiên âm (ưu tiên US, fallback sang UK hoặc bất kỳ phiên âm nào)
+                let phonetic = entry.phonetic;
+                if (!phonetic) {
+                    const phoneticEntry = entry.phonetics.find(p => p.text);
+                    phonetic = phoneticEntry ? phoneticEntry.text : 'No phonetic available';
+                }
+                phoneticEl.textContent = phonetic;
 
-    // Search job codes
-    function searchJobCodes() {
-      const query = document.getElementById('searchInput').value.toLowerCase();
-      const filteredData = jobCodes.filter(row =>
-        (row['Job code'] && row['Job code'].toLowerCase().includes(query)) ||
-        (row['Customer name'] && row['Customer name'].toLowerCase().includes(query))
-      );
-      displayJobCodes(filteredData);
-    }
-  </script>
+                // Lấy âm thanh từ API
+                currentAudioUrl = '';
+                useWebSpeech = false;
+                for (const p of entry.phonetics) {
+                    if (p.audio && p.audio !== '' && p.audio.startsWith('http')) {
+                        currentAudioUrl = p.audio;
+                        break;
+                    }
+                }
+
+                // Nếu không có âm thanh từ API, dùng Web Speech API
+                if (!currentAudioUrl && 'speechSynthesis' in window) {
+                    useWebSpeech = true;
+                }
+
+                // Cập nhật trạng thái nút loa
+                speakerBtn.disabled = !currentAudioUrl && !useWebSpeech;
+                speakerBtn.classList.toggle('web-speech', useWebSpeech && !currentAudioUrl);
+
+                // Lấy định nghĩa
+                const definitions = entry.meanings.map(meaning => 
+                    `${meaning.partOfSpeech}: ${meaning.definitions[0].definition}`
+                ).join('<br>');
+                meaningEl.innerHTML = definitions;
+
+                resultDiv.style.display = 'flex';
+            } catch (error) {
+                resultDiv.style.display = 'none';
+                alert('Word not found or API error!');
+                console.error(error);
+            }
+        }
+
+        function playSound() {
+            if (useWebSpeech) {
+                const utterance = new SpeechSynthesisUtterance(currentWord);
+                utterance.lang = 'en-US'; // Giọng Mỹ
+                utterance.volume = 1;
+                utterance.rate = 1;
+                utterance.pitch = 1;
+                window.speechSynthesis.speak(utterance);
+            } else if (currentAudioUrl) {
+                const audio = new Audio(currentAudioUrl);
+                audio.play().catch(error => {
+                    console.error('Error playing audio:', error);
+                    alert('Failed to play audio!');
+                });
+            } else {
+                alert('No audio available for this word!');
+            }
+        }
+
+        function saveAsImage() {
+            const resultDiv = document.getElementById('result');
+            if (resultDiv.style.display === 'none') {
+                alert('No result to save!');
+                return;
+            }
+            html2canvas(resultDiv).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'dictionary_result.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }).catch(error => {
+                console.error('Error saving image:', error);
+                alert('Failed to save image!');
+            });
+        }
+
+        document.getElementById('wordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchWord();
+            }
+        });
+    </script>
 </body>
 </html>
